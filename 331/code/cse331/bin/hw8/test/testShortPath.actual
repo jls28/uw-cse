@@ -1,0 +1,16 @@
+Menu:
+	r to find a route
+	b to see a list of all buildings
+	q to quit
+
+Enter an option ('m' to see the menu): # Verify that the program finds and correctly outputs a short path
+Abbreviated name of starting building: Abbreviated name of ending building: Path from Chemistry Library (Southeast Entrance) to Chemistry Library (Northeast Entrance):
+	Walk 27 feet E to (1775, 1704)
+	Walk 30 feet NE to (1785, 1694)
+	Walk 21 feet NE to (1791, 1686)
+	Walk 69 feet NW to (1776, 1658)
+	Walk 67 feet SW to (1746, 1673)
+Total distance: 215 feet
+
+Enter an option ('m' to see the menu): 
+# All of your test scripts should end with q to terminate the program.

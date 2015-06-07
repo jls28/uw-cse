@@ -1,0 +1,25 @@
+Edge:
+    Edge doesn't have too many methods
+    - made sure both constructors work for a given input
+    - made sure constructor fails when it's supposed to
+    - made sure equals passed all symmetry, reflexivity, and transitivity tests
+    - made sure hashCode worked properly
+
+Graph:
+    Graph is a beast
+    Had to build up a couple different kinds of graphs and then used them appropriately
+    eg an empty graph, a graph with one node, a graph with two nodes and an edge between them
+
+    on top of that, a lot of my functions return in the same way hashMap functions return,
+    for example testAddEdgeReturnsTrueOnSuccess and testAddEdgeReturnsFalseOnFailure, where
+    success will return true when the edge is made and added to the set of edges and is unique,
+    and failure will return false if the edge is attempted to be made but is not unique
+
+    also had to make sure any function that returned a list, such as listChildren, returned
+    properly when they have 0 children, 1 child, or plural children
+
+    also had to make sure there was no rep exposure. The HashMap that the graph uses is never exposed, but
+    it does return keys and hashsets of edges. the String keys are immutable, so they aren't a problem.
+    However, the hashsets are mutable because they have to be (to add edges [could do some weird copy-replacing
+    but that sounds unfun and slow]), so have to make sure whatever HashSets are returned are copies,
+    not references to the map itself

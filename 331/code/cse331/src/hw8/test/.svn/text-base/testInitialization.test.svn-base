@@ -1,0 +1,4 @@
+# Verify that the program initializes and can quit
+
+# All of your test scripts should end with q to terminate the program.
+q

@@ -1,0 +1,14 @@
+//Stefan Dierauf Oct 2013
+//Homework 4
+
+Task 2
+1. tar xvf hw4.tar.gz
+2. chmod ug+r example1.txt
+3a. chmod u+rw,go-rwx *.d*
+3b. chmod 600 *.d*
+4. chgrp admin `find . *`
+5. sudo vim /etc/hosts
+6. chmod 777 `find . *.java`
+7. //cant seem to use the -size flag of find correctly
+8. umask 400
+

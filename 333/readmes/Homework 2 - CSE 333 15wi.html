@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Homework 2 - CSE 333 15wi</title>
+  <meta name="description" content="Systems Programming">
+
+  <link rel="canonical" href="http://courses.cs.washington.edu/courses/cse333/15wi/hw/hw2/">
+
+  <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+
+  <link href="/courses/cse333/15wi/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/courses/cse333/15wi/css/main.css">
+
+  <script>(function(w,d,u){w.readyQ=[];w.bindReadyQ=[];function p(x,y){if(x=="ready"){w.bindReadyQ.push(y);}else{w.readyQ.push(x);}};var a={ready:p,bind:p};w.$=function(f){if(f===d||f===u){return a}else{p(f)}}})(window,document)</script>
+
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/courses/cse333/15wi/">CSE 333: Systems Programming</a>
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active">
+          <a href="/courses/cse333/15wi/">Home</a>
+        <li>
+          <a href="/courses/cse333/15wi/overview.html">Overview</a>
+        <li>
+          <a href="/courses/cse333/15wi/schedule.html">Schedule</a>
+        <li>
+          <a href="/courses/cse333/15wi/resources.html">Resources</a>
+      </ul>
+      <ul class="nav navbar-nav navbar-right hidden-xs">
+        <li><a>15wi</a></li>
+      </ul>
+    </div><!-- /.nav-collapse -->
+  </div><!-- /.container -->
+</div><!-- /.navbar -->
+
+</header>
+
+
+    <div class="container">
+    <div class="page-header" style="margin-top:10px">
+  <h1>Homework 2</h1>
+  <p>Due: Tue, 10 Feb 2015 23:00:00 -0800</p>
+</div>
+
+<article class="post-content">
+<p>For homework #2, you will use the <code>LinkedList</code> and <code>HashTable</code> modules
+that you built in homework #1 in order to finish our implementation
+of a file system crawler, indexer, and search engine. Homework #2
+has three parts to it. In Part A, you will build a module that reads
+the content of a file into memory, parses it into a series of words,
+and builds a linked list of (word, position) information. In Part
+B, you will build modules that convert a series of these linked
+lists into an in-memory, inverted index. In Part C, you will use
+this in-memory, inverted index to build a query processor that has
+a console-based interface.</p>
+
+<p>As before, pease read through this entire document before beginning
+the assignment, and please start early! There is a fair amount of
+coding you need to do to complete this assignment, and it will
+definitely expose any conceptual weaknesses you have with the prior
+material on C, pointers, malloc/free, and the semantics of the
+<code>LinkedList</code> and <code>HashTable</code> implementations.</p>
+
+<p>In HW1, we asked you to look for out-of-memory errors and return
+an error code to the caller. To make life a bit easier, in HW2, you
+can use <code>Verify333()</code> to test for an out-of-memory error; this way,
+running out of memory will cause the program to halt, and you don’t
+need to deal with returning an error code if one occurs.</p>
+
+<h2 id="part-a-finish-our-fileparserc">Part A: finish our fileparser.c</h2>
+
+<p>You’re going to write a module that reads the contents of a text
+file into memory and then parses the text file to look for words
+within it. As it finds words, it will build up a <code>HashTable</code> that
+contains one record for each word. Each record will contain a
+lower-case copy of the word, and also a sorted linked list. Each
+record of the linked list contains an offset within the file that
+the word appeared in. (The first character in the file has offset
+zero.)</p>
+
+<p>Our word parser won’t be very smart. It will treat as a word any
+non-zero sequence of alphabetic characters separated by non-alphabetic
+characters.</p>
+
+<p>So, graphically, what your module will take a text file that contains
+something like this. (Whenever you see a “\n” in the text file,
+that represents a “newline” control character that appears at the
+end of each line of the text file.)</p>
+
+<pre><code>My goodness!  I love the course CSE333.\n
+I'll recommend this course to my friends.\n 
+</code></pre>
+
+<p>and produces a data structure that looks like this:</p>
+
+<div style="text-align:center;margin-bottom:10px;">
+<img src="wordpos_table.png" />
+</div>
+
+<p>Specifically, note a few things:</p>
+
+<ul>
+  <li>
+    <p>Each key in the hash table is the result of calling the hashtable
+module’s <code>FNVHash64()</code> function, passing the string as the first
+argument, and the <code>strlen(string)</code> as the second argument.</p>
+  </li>
+  <li>
+    <p>Each element in the hash table is a pointer to a heap-allocated
+structure that contains two fields; a string and a linked list.
+Note the string is lower-cased, and that our parser is not very
+smart: because it treats any sequence of alphabetic characters,
+surrounded by non-alphabetic characters, as words, the word <code>I'll</code>
+was misparsed as the two words <code>i</code> and <code>ll</code>.</p>
+  </li>
+  <li>
+    <p>Each element in the linked list is an integer that contains a
+position in the text file that the word starts at. So, the word
+“my” starts at offset 0 in the text file, the word “i” appears
+twice, once at offset 14 and once at offset 40, and the word “course”
+appears twice, once at offset 25 and once at offset 62.</p>
+  </li>
+  <li>
+    <p>Each list is sorted in ascending order.</p>
+  </li>
+</ul>
+
+<h3 id="what-to-do">What to do</h3>
+
+<p>You should follow these steps to do this assignment:</p>
+
+<ul>
+  <li>Navigate to the directory containing your hw1 directory. Click
+(or right-click if needed) on <a href="hw2.tar.gz">this hw2.tar.gz link</a>
+to download the
+archive containing the starter code for hw2 and the directory
+containing test data for the remaining parts of the project. Extract
+its contents and verify that you have everything.</li>
+</ul>
+
+<div class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span> tar xzf hw2.tar.gz
+<span class="gp">$</span> ls
+<span class="go">clint.py  gtest  hw1  hw1.tar.gz  hw2  hw2.tar.gz  LICENSE.TXT  projdocs</span></code></pre></div>
+
+<p>(It’s ok if you’ve previously deleted the hw1.tar.gz archive with
+the hw1 starter files, but you still need the hw1 directory itself.
+hw2 won’t build properly without it.)</p>
+
+<ul>
+  <li>
+    <p>Take a look inside hw2, and note a few things:</p>
+
+    <ul>
+      <li>
+        <p>There is a subdirectory called <code>libhw1/</code>. It has symbolic links
+to header files and your <code>libhw1.a</code> from <code>../hw1</code>. (Therefore, you
+should make sure you have compiled everything in <code>../hw1</code> while
+working on hw2.)</p>
+      </li>
+      <li>
+        <p>If you don’t think your HW1 solution is up to the job, you can use
+ours instead. Our <code>libhw1.a</code> is in <code>../hw1/solution_binaries</code>; just
+copy it over your <code>../hw1/libhw1.a</code>.</p>
+      </li>
+      <li>
+        <p>Just like with HW1, there is a Makefile that compiles the
+project, a series of files (test_*) that contain our unit tests,
+and some files (doctable.c, doctable.h, filecrawler.c, filecrawler.h,
+fileparser.c, fileparser.h, memindex.c, memindex.h, searchshell.c)
+that contain our partial implementation of the project.</p>
+      </li>
+      <li>
+        <p>Type <code>make</code> to compile the project, and try running the test
+suite by running <code>./test_suite</code>. It should fail (and might not
+even terminate), since most of the implementation is missing!</p>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>Also note there is a new subdirectory called <code>test_tree/</code> that
+contains a bunch of text files and subdirectories containing more
+text files. Explore this subdirectory and its contents; start with
+the <code>README.TXT</code> file.</p>
+  </li>
+  <li>
+    <p>Your job in Part A is to finish the implementation of <code>fileparser.c</code>.
+Start by reading through <code>fileparser.h</code> and make sure you understand
+the semantics of the functions. Also, look at the <code>WordPositions</code>
+structure typedef’ed in <code>fileparser.h</code> and compare it to the figure
+above. The function <code>BuildWordHT()</code> builds a <code>HashTable</code> that looks
+like the figure, and each value in the <code>HashTable</code> contains a
+heap-allocated <code>WordPositions</code> structure.</p>
+  </li>
+  <li>
+    <p>Similar to HW1, look through <code>fileparser.c</code> to get a sense of it’s
+layout, and look for all occurrences of PART X (e.g., PART 1, PART
+2, …) for where you need to add code. Be sure to read the full
+file before adding any code, so you can see the full structure of
+what we want you to do. Once you’re finished adding code, run the
+test suite and you should see three suites succeed: FPTestReadFile,
+FPTestBuildWordHT, and FPTestBigBuildWordHT.</p>
+  </li>
+  <li>
+    <p>As before, in the subdirectory <code>solution_binaries/</code> we’ve provided
+you with linux executables (<code>test_suite</code> and <code>searchshell</code>) that were
+compiled with our complete, working version of HW2. You can run
+them to see what should happen when your HW2 is working.</p>
+  </li>
+</ul>
+
+<h2 id="part-b-finish-our-file-crawler-and-indexer">Part B: finish our file crawler and indexer</h2>
+
+<p>At a high-level, a search engine is really simple. It has three
+major components: a crawler, an indexer, and a query processor. A
+crawler explores the world, looking for documents to index. The
+indexer takes a set of documents found by the crawler, and produces
+something called an inverted index out of them. A query processor
+asks a user for a query, and processes it using the inverted index
+to figure out a list of documents that match the query.</p>
+
+<p><strong>File system crawler</strong>: Your file system crawler will be provided
+with the name of a directory in which it should start crawling. Its
+job is to look through the directory for documents (text files) and
+to hand them to the indexer, and to look for subdirectories; it
+recursively descends into each subdirectory to look for more documents
+and sub-sub-directories. For each document it encounters, it will
+assign the document a unique “document ID”, or “docID”. A docID is
+just a 64-bit unsigned integer.</p>
+
+<p>Your crawler itself will build two hash tables in memory, adding
+to them each time it discovers a new text file. The two hash tables
+map from docID to document filename, and from document filename to
+docID:</p>
+
+<div style="text-align:center;margin-bottom:10px;">
+<img src="doctable.png" />
+</div>
+
+<p>For each document the crawler finds, it will make use of your part
+A code to produce a word hashtable using <code>BuildWordHT()</code>.</p>
+
+<p><strong>Indexer</strong>: This is the heart of the search engine. The job of the
+indexer is to take each word hashtable produced by <code>BuildWordHT()</code>,
+and fold its contents in to an inverted index. An inverted index
+is easy to understand; it’s just a hash table that maps from a word
+to a “posting list,” and a posting list is just a list of places
+that word has been found.</p>
+
+<p>Specifically, the indexer should produce an in-memory hash table
+that looks roughly like this:</p>
+
+<div style="text-align:center;margin-bottom:10px;">
+<img src="inverted_index.png" />
+</div>
+
+<p>Walking through it, the inverted index is a hash table that maps
+from a (hash of a) word to a structure. The structure (shown in
+green) contains the word as a string, and also a <code>HashTable</code>. The
+HashTable maps from the docID (not the hash of docID) to a <code>LinkedList</code>.
+The <code>LinkedList</code> contains each position that word appeared in that
+docID.</p>
+
+<p>So, based on the figure, you can see that the word “course” appeared
+in a single document with docID 3, at byte offsets 25 and 62 from
+the start of file. Similarly, the word “love” appears in three
+documents: docID 1 at positions 7 and 92, docID 3 at position 16,
+and docID 4 at positions 18, 21, and 55.</p>
+
+<h3 id="what-to-do-1">What to do</h3>
+
+<p>The bulk of the work in this homework is in this step. We’ll tackle
+it in parts.</p>
+
+<ul>
+  <li>
+    <p>Take a look at <code>doctable.h</code>; this is the public interface to the
+module that builds up the docID-to-docname HashTable and the
+docname-to-docID HashTable. Make sure you understand the semantics
+of everything in that header file; note that a single <code>DocTable</code>
+structure contains both of these tables, so when you implement
+<code>AllocateDocTable()</code>, you’ll end up malloc’ing a structure that
+contains two <code>HashTables</code>, and you’ll allocate each of those <code>HashTables</code>.</p>
+  </li>
+  <li>
+    <p>Take a look inside <code>doctable.c</code>; this is our partially completed
+implementation. Be sure to read the full file. Your job, as always,
+is to look for the “STEP X” comments and finish our implementation.
+Once you’ve finished the implementation, re-compile and re-run the
+<code>test_suite</code> executable to see if you pass our DTTestSimple test
+suite. If not, go back and fix some bugs!</p>
+  </li>
+  <li>
+    <p>Now, take a look inside <code>filecrawler.h</code>; this is the public interface
+to our file crawler module. Make sure you understand the semantics
+of everything in that header file. Next, read through the full
+<code>filecrawler.c</code> and then complete our implementation. Once you’re
+ready, re-compile and re-run the test_suite executable to see if
+you pass our FCTestSimple test suite. If not, go back and fix some
+bugs!</p>
+  </li>
+  <li>
+    <p>Finally, take a look inside <code>memindex.h</code>. This is the public interface
+to the module that builds up the in-memory inverted index. Make
+sure you understand the semantics of everything in that header file.
+Next, read the full <code>memindex.c</code>, and then complete our implementation.
+(This is the most involved part of the assignment.) Once you’re
+ready, re-compile and re-run the <code>test_suite</code> executable to see if
+you pass our <code>MITestSimple</code> test suite. If not, go back and fix some
+bugs!</p>
+  </li>
+</ul>
+
+<p>Once you’ve passed all of the test suites, re-rerun the test suites
+under valgrind and make sure you don’t have any memory leaks.</p>
+
+<p>Congrats, you’ve passed part B of the assignment!</p>
+
+<h2 id="part-c-finish-our-query-processor">Part C: finish our query processor</h2>
+
+<p>Now that you have a working inverted index, you’re ready to build
+your search engine. The job of a search engine is to receive queries
+from a user, and return a list of matching documents in some rank
+order.</p>
+
+<p>For us, a query is just a string of words, such as:</p>
+
+<pre><code>course friends my
+</code></pre>
+
+<p>The goal of our search engine is to find all of the documents that
+contain all of the words. So, if a document has the words “course”
+and “my” but not the word “friends,” it shouldn’t match.</p>
+
+<p>The way to execute a query is really simple. First, the query
+processor must split the query up into a list of words (the <code>strtok()</code>
+function is useful for this). Next, it looks up in the inverted
+index the list of documents that match the first word. This is our
+initial matching list.</p>
+
+<p>Next, for each additional word in the query, the query processor
+uses the inverted index to get access to the HashTable that contains
+the set of matching documents. For each document in the matching
+list, the query processor tests to see if that document is also in
+the HashTable. If so, it keeps the document in the matching list,
+and if not, it removes the document from the matching list.</p>
+
+<p>Once the processor has processed all of the words, it’s done. Now,
+it just has to rank the results, sort the results by rank, and
+return the sorted result list to the user.</p>
+
+<p>For us, our ranking function is very simple: given a document that
+matches against a query, we sum up the number of times each query
+word appears in the document, and that’s our rank. So, if the user
+provides the query “foo” and that words appears on a document 5
+times, the rank for that document given that query is 5. If the
+user provides a multi-word query, our sum includes the number of
+times each of the words in the query appears. So, if the user
+provides the query “foo bar”, the word “foo” appears in the document
+5 times, and the word “bar” appears 10 times, the rank of the
+document for that query is 15. The bigger the sum, the higher the
+rank, and therefore the better the search result.</p>
+
+<h3 id="what-to-do-2">What to do</h3>
+
+<p>We have provided a mostly empty skeleton file <code>searchshell.c</code>. It is
+up to you to complete it by implementing a program that uses the
+Linux console to interact with the user. When you run the processor
+(called <code>searchshell</code>—you can try a working <code>searchshell</code> in the
+<code>solution_binaries/</code> directory), it takes from a command line argument
+the name of a directory to crawl. After crawling the directory and
+building the inverted index, it enters a query processing loop,
+asking the user to type in a search string and printing the results.
+If the user signals end-of-file when the program asks for a search
+string (control-D from the linux terminal keyboard), the program
+should clean up any allocated resources (particularly memory) and
+shut down.</p>
+
+<p>When you are ready, try running <code>./searchshell</code> to interact with your
+program and see if your output matches the transcript from a search
+session with our solution:</p>
+
+<div class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span> ./searchshell ./test_tree
+<span class="go">Indexing &#39;./test_tree&#39;</span>
+<span class="go">enter query:</span>
+<span class="go">ulysses</span>
+<span class="go">  ./test_tree/books/ulysses.txt (10)</span>
+<span class="go">  ./test_tree/books/countofmontecristo.txt (2)</span>
+<span class="go">  ./test_tree/books/leavesofgrass.txt (1)</span>
+<span class="go">  ./test_tree/books/lesmiserables.txt (1)</span>
+<span class="go">  ./test_tree/books/paradiselost.txt (1)</span>
+<span class="go">enter query:</span>
+<span class="go">cosette</span>
+<span class="go">  ./test_tree/books/lesmiserables.txt (1022)</span>
+<span class="go">enter query:</span>
+<span class="go">sherlock</span>
+<span class="go">  ./test_tree/books/sherlockholmes.txt (101)</span>
+<span class="go">  ./test_tree/books/ulysses.txt (4)</span>
+<span class="go">enter query:</span>
+<span class="go">sherlock ulysses</span>
+<span class="go">  ./test_tree/books/ulysses.txt (14)</span>
+<span class="go">enter query:</span>
+<span class="go">ocean</span>
+<span class="go">  ./test_tree/books/mobydick.txt (81)</span>
+<span class="go">  ./test_tree/books/davincinotebooks.txt (41)</span>
+<span class="go">  ./test_tree/books/leavesofgrass.txt (36)</span>
+<span class="go">  ./test_tree/books/countofmontecristo.txt (24)</span>
+<span class="go">  ./test_tree/books/lesmiserables.txt (18)</span>
+<span class="go">  ./test_tree/books/paradiselost.txt (16)</span>
+<span class="go">  ./test_tree/books/ulysses.txt (10)</span>
+<span class="go">  ./test_tree/books/taleoftwocities.txt (6)</span>
+<span class="go">  ./test_tree/books/janeeyre.txt (4)</span>
+<span class="go">  ./test_tree/books/huckfinn.txt (4)</span>
+<span class="go">  ./test_tree/books/therepublic.txt (4)</span>
+<span class="go">  ./test_tree/books/analyzepeopleonsight.txt (1)</span>
+<span class="go">  ./test_tree/books/warandpeace.txt (1)</span>
+<span class="go">  ./test_tree/books/thetimemachine.txt (1)</span>
+<span class="go">  ./test_tree/books/thejunglebook.txt (1)</span>
+<span class="go">  ./test_tree/bash-4.2/examples/functions/jdate.bash (1)</span>
+<span class="go">  ./test_tree/books/wutheringheights.txt (1)</span>
+<span class="go">  ./test_tree/books/dracula.txt (1)</span>
+<span class="go">  ./test_tree/books/tomsawyer.txt (1)</span>
+<span class="go">enter query:</span>
+<span class="go">ocean whale</span>
+<span class="go">  ./test_tree/books/mobydick.txt (1313)</span>
+<span class="go">  ./test_tree/books/leavesofgrass.txt (41)</span>
+<span class="go">  ./test_tree/books/countofmontecristo.txt (25)</span>
+<span class="go">  ./test_tree/books/lesmiserables.txt (19)</span>
+<span class="go">  ./test_tree/books/ulysses.txt (13)</span>
+<span class="go">  ./test_tree/books/thejunglebook.txt (5)</span>
+<span class="go">  ./test_tree/books/huckfinn.txt (5)</span>
+<span class="go">  ./test_tree/books/dracula.txt (2)</span>
+<span class="go">enter query:</span>
+<span class="go">ocean whale huckleberry</span>
+<span class="go">  ./test_tree/books/huckfinn.txt (17)</span>
+<span class="go">enter query:</span>
+<span class="go">ocean whale ravenous</span>
+<span class="go">  ./test_tree/books/mobydick.txt (1314)</span>
+<span class="go">  ./test_tree/books/leavesofgrass.txt (42)</span>
+<span class="go">  ./test_tree/books/ulysses.txt (15)</span>
+<span class="go">enter query:</span>
+<span class="go">ocean whale ravenous huckleberry</span>
+<span class="go">enter query:</span>
+<span class="go">badarraysub</span>
+<span class="go">  ./test_tree/bash-4.2/arrayfunc.c (11)</span>
+<span class="go">  ./test_tree/bash-4.2/subst.c (2)</span>
+<span class="go">  ./test_tree/bash-4.2/error.c (1)</span>
+<span class="go">  ./test_tree/bash-4.2/error.h (1)</span>
+<span class="go">enter query:</span>
+<span class="go">badarraysub subst</span>
+<span class="go">  ./test_tree/bash-4.2/subst.c (45)</span>
+<span class="go">  ./test_tree/bash-4.2/arrayfunc.c (12)</span></code></pre></div>
+
+<p>Alternatively, compare your searchshell to the searchshell we
+provided in the <code>solution_binaries/</code> directory.  Note that our
+ranking function does not specify an ordering for two documents
+with the same rank. Documents that have the same rank may be listed
+in any order, and that might be different from the ordering in the
+sample transcript or produced by the <code>solution_binaries</code> version
+of searchshell.</p>
+
+<h2 id="bonus">Bonus</h2>
+
+<p>We’re offering two extra credit tasks. These are purely optional;
+if you choose not to do either, your grade won’t be negatively
+affected at all. These are just if you happen to have the time and
+interest! You can do either or both of the bonus tasks.</p>
+
+<ol>
+  <li>
+    <p>When searching text documents for a given query, some words in
+the query do not add any value to the quality of the search results.
+These words are known as stop words and include common function
+words such as the, is, and, at, which, there, on, and so on. Some
+Web search engines filter these stop words, excluding them from
+both their indexes and ignoring them in queries; this results in
+both better search quality and significantly more efficient indexes
+and query execution.</p>
+
+    <p>For extra credit, implement a stop word filter. The search shell
+should accept a second, <em>optional</em> argument <code>-s</code> that will act as
+a flag for turning the filter on. When the flag is not specified,
+your program should not filter any stop words. It is up to you
+to decide how you will implement the stop word filter (and where
+you’ll get your list of stop words), but be sure to explain in
+your README file what changes you had to make and how your filter
+works. Stop words that have apostrophes in them should be handled
+the same way that you’ve handled the words in the documents.</p>
+  </li>
+  <li>
+    <p>You probably noticed that we went to a lot of trouble to have
+you include word position information in our inverted index posting
+lists, but we didn’t make use of it. In this bonus task, you will.
+In addition to letting you search for words, modern search engines
+also let you search for phrases. For example, I could specify the
+following query:</p>
+
+    <pre><code>alice "cool fountains" flowers
+</code></pre>
+
+    <p>This query would match all documents that contain all of the following:
+the word <em>alice</em>,
+the phrase <em>cool fountains</em> (i.e., the words <em>cool</em> and
+<em>fountains</em> right next to each other, in that order), and
+the word <em>flowers</em>.</p>
+
+    <p>Using the positions information in the inverted index postings list,
+ implement support for phrase search. You’ll have to also modify the
+ query processor to support phrase syntax; phrases are specified by
+ using quotation marks. Be sure to explain in your README file what
+ changes you had to make to get phrasing to work.</p>
+  </li>
+</ol>
+
+<h2 id="what-to-turn-in">What to turn in</h2>
+
+<p>When you’re ready to turn in your assignment, do the following:</p>
+
+<ul>
+  <li>
+    <p>In the <code>hw2</code> directory, run <code>make clean</code> to clean out any object
+files and emacs detritus; what should be left are your source files.</p>
+  </li>
+  <li>
+    <p>In the <code>hw2</code> directory:</p>
+  </li>
+</ul>
+
+<div class="highlight"><pre><code class="language-console" data-lang="console"><span class="gp">$</span> make clean
+<span class="gp">$</span> <span class="nb">cd</span> ..
+<span class="gp">$</span> tar czf hw2_&lt;username&gt;.tar.gz hw2
+<span class="gp">$</span> <span class="c"># make sure the tar file has no compiler output files in it, but</span>
+<span class="gp">$</span> <span class="c"># does have all your source</span>
+<span class="gp">$</span> tar tzf hw2_&lt;username&gt;.tar.gz</code></pre></div>
+
+<ul>
+  <li>Turn in <code>hw2_&lt;username&gt;.tar.gz</code> using the course dropbox linked on
+the main course webpage.</li>
+</ul>
+
+<h2 id="grading">Grading</h2>
+
+<p>We will be basing your grade on several elements:</p>
+
+<ul>
+  <li>
+    <p>The degree to which your code passes the unit tests contained in
+<code>test_suite.cc</code>. If your code fails a test, we won’t attempt to
+understand why: we’re planning on just including the number of
+points that the test drivers print out.</p>
+  </li>
+  <li>
+    <p>We have some additional unit tests that test a few additional
+cases that aren’t in the supplied test drivers. We’ll be checking
+to see if your code passes these.</p>
+  </li>
+  <li>
+    <p>The quality of your code. We’ll be judging this on several
+qualitative aspects, including whether you’ve sufficiently factored
+your code and whether there is any redundancy in your code that
+could be eliminated.</p>
+  </li>
+  <li>
+    <p>The readability of your code. For this assignment, we don’t have
+formal coding style guidelines that you must follow; instead, attempt
+to mimic the style of code that we’ve provided you. Aspects you
+should mimic are conventions you see for capitalization and naming
+of variables, functions, and arguments, the use of comments to
+document aspects of the code, and how code is indented. We strongly
+suggest using the clint.py tool to check your code for style issues.</p>
+  </li>
+</ul>
+
+</article>
+
+<script>
+$(document).ready(function () {
+  $("h2").addClass("page-header");
+});
+</script>
+
+    <footer class="site-footer">
+
+<div>
+  <a href="//www.washington.edu/online/terms/">UW Site Use Agreement</a>
+</div>
+
+<div>
+a1f18a39dc 2015-01-30 05:20:15 -0800
+
+</div>
+
+</footer>
+
+<script src="/courses/cse333/15wi/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/courses/cse333/15wi/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script>(function($,d){$.each(readyQ,function(i,f){$(f)});$.each(bindReadyQ,function(i,f){$(d).bind("ready",f)})})(jQuery,document)</script>
+
+    </div>
+
+    
+
+  </body>
+
+</html>

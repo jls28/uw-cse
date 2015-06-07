@@ -1,0 +1,7 @@
+alias attu="ssh sdierauf@attu.cs.washington.edu"
+alias mv="mv -i"
+alias cp="cp -i"
+alias scp="scp -i"
+
+
+echo Welcome back, `whoami`. You are exceptionally handsome today

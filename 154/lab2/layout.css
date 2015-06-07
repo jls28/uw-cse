@@ -1,0 +1,44 @@
+/* CSE 154 Spring 2014 Lab 2 stylesheet */
+
+#content {
+	border: 10px solid white;
+	background-color: white;
+	margin-left: 10%;
+	margin-right: 10%;
+}
+
+.entry {
+	border: 4px solid #C2E9E9;
+	border-radius: 15px;
+	background-color: #E8FBFB;
+	padding: 5px;
+	margin-top: 10px;
+	text-align: justify;
+	overflow: hidden;
+}
+
+.entry img {
+	float: right;
+}
+
+.entry .date {
+	border-bottom: 2px dashed blue;
+}
+
+.header {
+	background-color: #A8F0F0;
+	font-size: 14pt;
+	text-align: right;
+}
+
+body {
+	background-image: url('https://webster.cs.washington.edu/images/spatula-background.gif');
+}
+
+#sidebar {
+	float: left;
+	height: 800px;
+}
+
+#meat {
+}

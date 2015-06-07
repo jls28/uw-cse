@@ -1,0 +1,5 @@
+# Verify that the program correctly outputs unknown option
+blranfjansdfkjansdfjk unknowwn
+
+# All of your test scripts should end with q to terminate the program.
+q

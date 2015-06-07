@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- Stefan Dierauf May 2014
+main ascii.html page for homework 7 
+Extra feature 'reverse' implemented
+-->
+
+<html>
+  <head>
+    <title>ASCIImation</title>
+    <script src="https://webster.cs.washington.edu/js/asciimation/animations.js"></script>
+    <script src="https://webster.cs.washington.edu/js/asciimation/gallery.js"></script>
+    <script src="myanimation.js"></script>
+    <script src="ascii.js"></script>
+    <link rel="stylesheet" href="ascii.css">
+  </head>
+  
+  <body>
+    <div id="content">
+      <h1>ASCII Animation Viewer</h1>
+      <textarea id="view" cols="80" rows="20"></textarea>
+      <div id="controls">
+        <fieldset>
+          <legend>Play Controls</legend>
+          <button id="startButton">Start</button>
+          <button id="stopButton">Stop</button>
+        </fieldset>
+        
+        <fieldset>
+          <legend>Animation:</legend>
+          <select id="animation">
+            <option value="blank" selected>Blank</option>
+            <option value="exercise">Exercise</option>
+            <option value="juggler">Juggler</option>
+            <option value="bike">Bike</option>
+            <option value="dive">Dive</option>
+            <option value="custom">Custom</option>
+          </select>
+        </fieldset>
+        
+        <fieldset>
+          <legend>Size:</legend>
+          <select id="size">
+            <option value="7pt">Tiny</option>
+            <option value="10pt">Small</option>
+            <option value="12pt" selected>Medium</option>
+            <option value="16pt">Large</option>
+            <option value="24pt">Extra Large</option>
+            <option value="32pt">XXL</option>
+          </select>
+        </fieldset>
+        
+        <fieldset>
+          <legend>Speed:</legend>
+          <div class="speedbuttons">
+            <input type="radio" name="speed" value="50" />Turbo
+            <input type="radio" name="speed" value="250" checked />Normal
+            <input type="radio" name="speed" value="1500" />Slo-Mo
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Order:</legend>
+          <input type="checkbox" id="reverse" /> Reverse
+        </fieldset>
+      </div>
+    </div>
+    <div id="w3c">
+      <a href="https://webster.cs.washington.edu/validate-html.php"><img src="https://webster.cs.washington.edu/images/w3c-html.png" alt="Valid HTML5" /></a><br />
+      <a href="https://webster.cs.washington.edu/validate-css.php"><img src="https://webster.cs.washington.edu/images/w3c-css.png" alt="Valid CSS" /></a><br />
+      <a href="https://webster.cs.washington.edu/jslint/?referer"><img src="https://webster.cs.washington.edu/images/w3c-js.png" alt="Valid CSS" /></a>
+    </div>
+  </body>
+  
+</html>

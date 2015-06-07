@@ -1,0 +1,6 @@
+# Should go through y instead of z
+
+loaded graph letters
+path from a to g:
+a to y via vowel
+y to g via consonant

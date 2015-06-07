@@ -1,0 +1,31 @@
+Q:Are they male?
+Q:Is he the brother of Zeus
+Q:Is he the lord of the underworld?
+A:Hades
+A:Poseidon
+Q:Is he the son of Zeus
+Q:Is he a demigod?
+A:Hercules
+Q:Is he the god of wine and partying?
+A:Dionysus
+Q:Is he the god of smithing?
+A:Hephaestus
+Q:Does he carry the sun accross the sky in a chariot?
+A:Apollo
+Q:Is he the god of War?
+A:Ares
+A:Hermes
+A:Zeus
+Q:Is she a sister of Zeus
+Q:Is she the wife of Zeus
+A:Hera
+Q:Is her daughter named Persephone?
+A:Demeter
+A:Hestia
+Q:Is she the daughter of Zeus
+Q:Is she the goddess of love?
+A:Aphrodite
+Q:is she the goddess of the hunt?
+A:Artemis
+A:Athena
+A:computer

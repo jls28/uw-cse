@@ -1,0 +1,46 @@
+Menu:
+	r to find a route
+	b to see a list of all buildings
+	q to quit
+
+Enter an option ('m' to see the menu): # Tests two entrances that have extra info
+Abbreviated name of starting building: Abbreviated name of ending building: Path from University Bookstore (Secret Entrance) to Student Union Building (South Food Entrance):
+	Walk 229 feet SE to (1482, 621)
+	Walk 53 feet S to (1482, 646)
+	Walk 28 feet SE to (1487, 657)
+	Walk 428 feet S to (1481, 863)
+	Walk 39 feet S to (1480, 881)
+	Walk 62 feet E to (1510, 877)
+	Walk 22 feet E to (1522, 878)
+	Walk 28 feet SE to (1528, 890)
+	Walk 27 feet SE to (1537, 900)
+	Walk 330 feet SE to (1669, 988)
+	Walk 36 feet SE to (1684, 995)
+	Walk 100 feet E to (1730, 1008)
+	Walk 77 feet SE to (1754, 1034)
+	Walk 35 feet S to (1749, 1049)
+	Walk 75 feet E to (1786, 1049)
+	Walk 38 feet SE to (1798, 1062)
+	Walk 33 feet S to (1801, 1077)
+	Walk 124 feet SE to (1846, 1117)
+	Walk 73 feet SE to (1872, 1141)
+	Walk 49 feet SE to (1890, 1159)
+	Walk 117 feet SE to (1930, 1198)
+	Walk 220 feet SE to (2003, 1276)
+	Walk 30 feet SE to (2013, 1284)
+	Walk 96 feet SE to (2054, 1303)
+	Walk 150 feet E to (2127, 1311)
+	Walk 77 feet S to (2129, 1347)
+	Walk 194 feet SE to (2166, 1434)
+	Walk 114 feet E to (2221, 1432)
+	Walk 61 feet S to (2225, 1461)
+	Walk 42 feet SE to (2234, 1480)
+	Walk 50 feet SE to (2255, 1492)
+	Walk 29 feet S to (2257, 1505)
+	Walk 172 feet SE to (2307, 1571)
+	Walk 86 feet N to (2322, 1532)
+	Walk 173 feet N to (2309, 1450)
+Total distance: 3497 feet
+
+Enter an option ('m' to see the menu): 
+# All of your test scripts should end with q to terminate the program.

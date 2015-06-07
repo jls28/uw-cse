@@ -1,0 +1,73 @@
+body, #reviews {
+	background-image: url('https://webster.cs.washington.edu/images/moviebg.png');
+
+}
+
+h1 {
+	font-family: Tahoma, Verdana, sans-serif;
+	text-shadow: 3px 3px #999999;
+	text-align: center;
+}
+
+dl {
+	padding-left: 10px;
+	padding-right: 10px;
+	font-family: Arial, sans-serif;
+}
+
+dt {
+	padding-top: 10px;
+	font-weight: bold;
+}
+
+.reviewscol {
+	width: 47%;
+	float: left;
+	margin-left: 2%;
+}
+
+.review {
+	background-color: #E8DC9B;
+	border: 2px solid gray;
+	padding: 8px;
+}
+
+#ratingheader {
+	background-image: url('https://webster.cs.washington.edu/images/rottenlargebg.png');
+	font-size: 48pt;
+	font-weight: bold;
+	color: red;
+	max-height: 83px;
+}
+
+#percent {
+	vertical-align: super;
+}
+
+#content {
+	width: 800px;
+	margin: 0 auto;
+	border: 2px solid gray;
+	background-color: #A2B964;
+
+}
+
+#reviews {
+	width: 550px;
+}
+
+#sidebar {
+	float: right;
+	width: 250px;
+	font-size: 8pt;
+}
+
+#header {
+	text-align: center;
+	background-image: url('https://webster.cs.washington.edu/images/rancidbannerbg.png');
+
+}
+
+#footer {
+	clear: both;
+}

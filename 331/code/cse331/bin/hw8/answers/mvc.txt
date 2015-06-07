@@ -1,0 +1,7 @@
+For this assignment I kept my model, view, and controller very separate.
+
+CampusPathsTextInputController is the console based controller for CampusPaths. All it does
+is receive input on System.in and then calls methods on it's model. It _never_ prints. Conversely,
+CampusPathsTextView is a text based view for CampusPaths, and is added to a list of views in the model
+with the observer pattern. Whenever the model needs to update a view, it iterates through this list
+of views and calls the appropriate methods. CampusPathsTextView only prints and never takes input.

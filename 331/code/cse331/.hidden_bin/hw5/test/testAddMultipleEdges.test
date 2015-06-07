@@ -1,0 +1,13 @@
+CreateGraph g1
+AddNode g1 n1
+AddNode g1 n2
+AddEdge g1 n1 n2 COOLEDGE
+AddEdge g1 n1 n2 COOLEDGE2
+AddEdge g1 n1 n2 COOLEDGE3
+AddEdge g1 n1 n2 COOLEDGE4
+AddEdge g1 n1 n2 COOLEDGE5
+AddEdge g1 n1 n2 COOLEDGE6
+AddEdge g1 n1 n2 COOLEDGE7
+AddEdge g1 n1 n2 COOLEDGE8
+AddEdge g1 n1 n2 COOLEDGE9
+AddEdge g1 n1 n2 COOLEDGE10

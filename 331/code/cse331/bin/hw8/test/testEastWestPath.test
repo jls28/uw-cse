@@ -1,0 +1,7 @@
+# Tests a path travelling East to West
+r
+HUB (Food, W)
+UBS
+
+# All of your test scripts should end with q to terminate the program.
+q

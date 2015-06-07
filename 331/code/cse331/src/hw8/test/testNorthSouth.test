@@ -1,0 +1,8 @@
+# Verify that the program finds and correctly outputs the shortest path with
+# two buildings that go north -> south
+r
+SUZ
+CHL (SE)
+
+# All of your test scripts should end with q to terminate the program.
+q

@@ -1,0 +1,21 @@
+a.
+
+RatNum(int n, int d) would no longer need to call gcd()
+checkRep() would no longer need to assert "RatNum not in Lowest form"
+toString() would need to change to output fractions in reduced form, otherwise tostrings for the same
+number would be inconsistent.
+equals() would need to take the gcd of both numbers first, so it would be more complicated
+
+b.
+
+RatNum as a class would no longer be immutable, and instead of returning a RatNum equal to 'this' added/multiplied/etc
+with arg, it would return 'this'. As it would be modifying 'this', it would be a mutator, and the operations methods
+would need to update appropriately. Mutators don't usually often have return values either, so you would just call
+the mutator on your ratnum and then use it post modification.
+
+c.
+
+The only two fields a RatNum has is its numerator and denominator, both of which are set on instantiation (when it's
+constructed), and then can never be changed again because both fields are final ints. Therefore, assuming the RatNum conforms
+to its representation invariant when it's constructed, it should never need to be checked again. And as
+checkRep is called at the end of every constructor, the repinvariant is secured and then locked.

@@ -1,0 +1,16 @@
+Using a HashMap<String, HashSet<Edge>> as the main component of the graph. Then lookup for
+getting the set of edges for a node is constant, even with a ton of nodes.
+
+- As a collection of edges
+I actually didn't think about doing it this way but I like it. The only problem is that
+getting a list of all the nodes in the array could be scary and would be O(n) where n is the number of edges,
+but I bet it makes finding paths really easy..(although still not even sure how node lookup would even work)
+
+- As an adjacency list, in which each node is associated with a list of its outgoing edges
+This is essentially what I did. It makes lookup for a set of edges constant time, but then traversing that set is
+O(n). Hopefully, a node only has edges to a few other nodes, not every node in the graph.
+
+- As an adjacency matrix, which explicitly represents, for every pair ⟨A,B⟩ of nodes, what edges there are (if any) from A to B
+This will make a really really big matrix (and thusly take up a lot of memory),
+but it does make lookup for seeing if two nodes have a connection O(1).
+Unfortunately, to build a set of connections a node has, you have to traverse the row or column.

@@ -1,0 +1,11 @@
+Menu:
+	r to find a route
+	b to see a list of all buildings
+	q to quit
+
+Enter an option ('m' to see the menu): # Verify that the program correctly outputs two unknown buildings
+Abbreviated name of starting building: Abbreviated name of ending building: Uknown building UNKNOWN
+Uknown building IDONTKNOWW
+
+Enter an option ('m' to see the menu): 
+# All of your test scripts should end with q to terminate the program.

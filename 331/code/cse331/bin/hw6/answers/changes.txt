@@ -1,0 +1,10 @@
+* Made Edge class implement comparable, sorts by character name and then by book name
+
+* Added a removeEdge() method to Graph, although it's not used anywhere (for method Nirvana)
+
+* Added a deepCopy() method to Graph(), although it's not used anywhere (anymore, MarvelPaths used to be a stateful ADT
+before I realized that was kind of silly)
+
+* Added a getSortedEdges(parent) method to Graph(), so output would match for listChildren() in test driver
+
+* Added Unit tests for all of the above in hw5

@@ -1,0 +1,24 @@
+a.
+
+I didn't add any calls to checkRep(), as there was no need to call
+checkRep() additional times after instantiation. As RatTerm.coeff is final, and all the fields of RatNum are final
+primitives, and RatTerm.expt is final, a RatTerm is immutable after instantiation. Since it's immutable, there's
+just no need to call checkRep() again.
+
+b.
+
+RatTerm(RatNum c, int e) would no longer need to check if c.equals(ZERO)
+.isZero() would need to check just the coefficient
+.toString() would need more specification on how to deal with 0 coefficients and non zero exponent
+checkRep() shouldnt have the second assert which is no longer part of the rep invariant
+.add() and .sub() implementation would have to be careful about operating with
+a zero coefficient RatNum with some random exponent
+
+c.
+In every method that accepts a RatTerm that could potentially be NaN, the spec just states that that method should
+return something that is NaN, so the exponent of some NaN RatTerm doesn't matter.
+
+I like the rep invariant as is. Forcing a zero RatTerm to have a zero exponent makes my code easier to write, and having
+less restrictions on what a NaN is leaves me open to change it's implementation if I wish. I could potentially use the
+exponent field of NaN to signify what kind of NaN it is (-infinity, +infinity, undefined). If the exponent had to be
+zero, that would not allow me to have these options in the future.

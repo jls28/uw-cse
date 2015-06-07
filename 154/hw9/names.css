@@ -1,0 +1,41 @@
+/* 
+Stefan Dierauf May 2014
+CSS for babynames
+not really that fancy :(
+*/
+
+.rank {
+  color: black;
+  background-color: #FFBBBB;
+  width: 50px;
+  text-align: center;
+}
+
+td {
+  vertical-align: bottom;
+}
+
+
+body {
+  font-size: 12pt;
+  font-family: Georgia, serif;
+}
+
+.graphHeight {
+  height: 250px;
+}
+
+table {
+  text-align: center;
+}
+
+q {
+  font-style: italic;
+}
+
+#errors {
+  background-color: yellow;
+  color: red;
+  font-size: 40pt;
+  text-decoration: underline;
+}

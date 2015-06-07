@@ -1,0 +1,12 @@
+cd hw1
+make clean
+make all
+cd ../hw2
+make clean
+make all
+cd ../hw3
+make clean
+make all
+cd ../hw4
+make clean
+make all

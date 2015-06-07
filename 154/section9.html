@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>My Horoscope Page</title>
+	</head>
+
+	<body>
+		<h1>My Horoscope Page</h1>
+		
+		<p>
+			Type your month and day of birth below and click the Go button to see your sign and horoscope.
+		</p>
+		
+		<div>
+			<input id="month" type="text" size="4" maxlength="2"pattern="[0-9]{1,2}" required="required" placeholder="month" autofocus="autofocus" /> /
+			<input id="day"   type="text" size="4" maxlength="2" pattern="[0-9]{1,2}" required="required" placeholder="day" />
+			<button id="go">Go!</button>
+		</div>
+		
+		<!-- your code should insert the results here -->
+		<div id="results"></div>
+	</body>
+	<script>
+	  // CSE 154 Ajax section pre-problem
+    // You should complete this file.
+    // Your code must be run on the Webster server (not on your local computer).
+    
+    window.onload = function() {
+    	document.getElementById("go").onclick = goClick;
+    };
+    
+    function goClick() {
+    	// write your solution here!
+    	// Your code needs to connect to: https://webster.cs.washington.edu/cse154/sections/ajax/horoscope-server.php
+    	var month = document.getElementById("month").value;
+    	var day = document.getElementById("day").value;
+      var queryString = "https://webster.cs.washington.edu/cse154/sections/9/horoscope/horoscope-server.php?month=" + month + "&day=" + day;
+      //console.log(queryString);
+      var ajax = new XMLHttpRequest();
+      ajax.onload = funfunfun;
+      ajax.open("GET", queryString, true);
+      ajax.send();
+    }
+    
+    function funfunfun() {
+      var results = document.getElementById("results");
+      results.innerHTML = this.responseText;
+    }  
+	</script>
+</html>

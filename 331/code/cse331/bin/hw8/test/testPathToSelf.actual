@@ -1,0 +1,11 @@
+Menu:
+	r to find a route
+	b to see a list of all buildings
+	q to quit
+
+Enter an option ('m' to see the menu): # Verify that the program finds a route to itself with a 0 foot length
+Abbreviated name of starting building: Abbreviated name of ending building: Path from Paul G. Allen Center for Computer Science & Engineering to Paul G. Allen Center for Computer Science & Engineering:
+Total distance: 0 feet
+
+Enter an option ('m' to see the menu): 
+# All of your test scripts should end with q to terminate the program.

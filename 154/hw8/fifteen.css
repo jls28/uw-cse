@@ -1,0 +1,41 @@
+/* 
+  Stefan Dierauf May 2014
+  CSS for fifteen puzzle
+*/
+
+body {
+  font-family: cursive;
+  font-size: 14pt;
+  text-align: center;
+}
+
+#puzzlearea {
+  width: 400px;
+  height: 400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.tile {
+  width: 90px;
+  height: 90px;
+  font-size: 40pt;
+  color: white;
+  background-image: url("background.jpg");
+  border: 5px solid black;
+  position: absolute;
+}
+
+.canMove {
+  border: 5px solid red;
+}
+
+.canMove:hover {
+  cursor: pointer;
+}
+
+.winrar {
+  background-color: yellow;
+  color: purple;
+  font-size: 40pt;
+}

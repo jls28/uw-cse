@@ -1,0 +1,7 @@
+# Verify that the program finds and correctly outputs a short path
+r
+CHL (SE)
+CHL (NE)
+
+# All of your test scripts should end with q to terminate the program.
+q

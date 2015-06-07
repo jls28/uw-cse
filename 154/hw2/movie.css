@@ -1,0 +1,156 @@
+/*
+Stefan Dierauf CSE April 2014 Section BG
+Rotten Tomatos featuring TMNT movie review html
+All extra features implemented.
+*/
+
+body, h1 {
+	font-family: Verdana, Tahoma, sans-serif;
+}
+
+body, .entry p:first-child, #ratingheader span.small, #sidebar, .whitespace {
+	font-size: 8pt;
+}
+
+dt, .entry p:first-child, #ratingheader {
+	font-weight: bold;
+}
+
+.entry, .entry p:first-child, #content {
+	overflow: hidden;
+}
+
+#header, #footer div {
+	position: fixed;
+}
+
+h1, #header, #footer p {
+	text-align: center;
+}
+
+body {
+	background-image: url('https://webster.cs.washington.edu/images/moviebg.png');
+	margin: 0;
+	padding: 0;
+}
+
+h1 {
+	text-shadow: 3px 3px #999999;
+	font-size: 24pt;
+	margin-top: 72px;
+}
+
+dl {
+	padding-left: 10pt;
+	padding-right: 10pt;
+	font-family: Arial, sans-serif;
+	margin-top: 10pt;
+}
+
+dd {
+	margin-bottom: 10pt;
+}
+
+ul {
+	list-style-type: none;
+	padding-left: 0;
+}
+
+.reviewscol, .entry p img {
+	float: left;
+}
+
+.reviewscol {
+	width: 47%;
+	margin-left: 2%;
+}
+
+.entry {
+	margin-bottom: 7pt;
+	min-height: 105px;
+}
+
+.entry p:first-child {
+	background-color: #E8DC9B;
+	border: 2px solid gray;
+	padding: 8px;
+	border-radius: 10px;
+}
+
+.entry img {
+	padding-right: 5px;
+}
+
+
+.entry p span {
+	font-style: italic;
+}
+
+#ratingheader {
+	background-image: url('https://webster.cs.washington.edu/images/rottenlargebg.png');
+	text-align: left;
+	height: 83px;
+	font-size: 48pt;
+	color: red;
+	overflow: hidden;
+}
+
+#ratingheader span.small {
+	color: white;
+	font-weight: normal;
+}
+
+#ratingheader img {
+	vertical-align: text-bottom;
+}
+
+#content {
+	width: 800px;
+	margin: 0 auto;
+	border: 4px solid gray;
+	border-radius: 20px;
+}
+
+#reviews {
+	width: 550px;
+}
+
+#sidebar {
+	float: right;
+	width: 250px;
+}
+
+#sidebar, #footer {
+	background-color: #A2B964;
+}
+
+#header {
+	top: 0;
+	width: 100%;
+	height: 50px;
+	background-image: url('https://webster.cs.washington.edu/images/rancidbannerbg.png');
+}
+
+#footer {
+	clear: both;
+}
+
+#footer p {
+	margin-bottom: 0;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+#footer div {
+	right: 0;
+	bottom: 0;
+}
+
+#footer a {
+	opacity: 0.5;
+}
+
+#footer a:hover {
+	opacity: 1;
+}
+

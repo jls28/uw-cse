@@ -1,0 +1,10 @@
+# Verify that the program correctly deals with comments and newlines
+
+# Single newline
+
+
+
+# a few newlines
+
+# All of your test scripts should end with q to terminate the program.
+q

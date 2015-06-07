@@ -1,0 +1,30 @@
+Menu:
+	r to find a route
+	b to see a list of all buildings
+	q to quit
+
+Enter an option ('m' to see the menu): # Verify that the program finds and correctly outputs the shortest path with
+# two buildings that go north -> south
+Abbreviated name of starting building: Abbreviated name of ending building: Path from Suzzallo Library to Chemistry Library (Southeast Entrance):
+	Walk 51 feet W to (1871, 1322)
+	Walk 146 feet S to (1855, 1390)
+	Walk 35 feet SE to (1865, 1404)
+	Walk 55 feet SE to (1877, 1427)
+	Walk 54 feet SE to (1888, 1451)
+	Walk 64 feet SW to (1861, 1464)
+	Walk 54 feet SW to (1837, 1477)
+	Walk 84 feet SW to (1805, 1500)
+	Walk 45 feet SW to (1789, 1516)
+	Walk 31 feet S to (1785, 1531)
+	Walk 89 feet W to (1743, 1540)
+	Walk 193 feet S to (1744, 1632)
+	Walk 42 feet E to (1764, 1636)
+	Walk 53 feet SE to (1776, 1658)
+	Walk 69 feet SE to (1791, 1686)
+	Walk 21 feet SW to (1785, 1694)
+	Walk 30 feet SW to (1775, 1704)
+	Walk 27 feet W to (1763, 1709)
+Total distance: 1144 feet
+
+Enter an option ('m' to see the menu): 
+# All of your test scripts should end with q to terminate the program.

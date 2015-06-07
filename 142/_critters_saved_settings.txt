@@ -1,0 +1,19 @@
+#CSE 142 Critters saved settings
+#Tue Dec 11 13:10:30 PST 2012
+Alpha=false
+Height=50
+Number\ of\ each\ critter=25
+Network\ features=false
+Vulture=false
+Frog=false
+Secure\ tournament\ mode=false
+Bird=false
+Bumblebee=true
+Husky=false
+Debug\ output=false
+Ant=false
+Cougar=false
+Hippo=false
+Width=60
+Rabbit=false
+Stone=false

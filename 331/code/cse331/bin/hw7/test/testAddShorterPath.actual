@@ -1,0 +1,6 @@
+loaded graph letters
+added edge 0.000 from a to y in letters
+path from a to b:
+a to y with weight 0.000
+y to b with weight 1.000
+total cost: 1.000

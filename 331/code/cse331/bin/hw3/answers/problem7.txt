@@ -1,0 +1,35 @@
+Stefan Dierauf
+
+Ball.getVolume() always returns 0
+changed to return this.volume
+
+BallContainer all the methods were the same as a Set except getvolume()
+
+Two options for getVolume():
+
+Every time getVolume() is called, go through all the Balls in the Set 
+and add up the volumes. (Hint: one solution might use a for-each loop to extract Balls from the Set.)
+--I actually like this one more. It's simpler, more expensive code compute-wise, but it will always work.
+This method is nice because I dont have to add any more state to the object
+
+Keep track of the total volume of the Balls in BallContainer whenever Balls are added and removed. 
+This eliminates the need to perform any computations when getVolume is called.
+--This would work, and it would be faster in the long run (high compute time for millions of balls on call vs
+tiny amount of math when adding or removing), but it means I'd have to add another parameter to the object and manage
+the state of that parameter. The less state the better IMO. If it turned out this was a commonly used method and people
+were complaining, I would rewrite it in this way to be more efficient. 
+
+---------
+
+There are many ways to implement getBallsFromSmallest(). Briefly describe at least two different ways.
+Your answers should differ in the implementation of Box, not in lower-level implementation 
+
+1. You could make a Comparator that can compare two balls, and then use that with Collections.sort()
+2. You could write your own collection with your own sort method and write a lot of code and it would be terrible
+tbh I haven't touched Java for a while and all I can think of actually doing besides how I implemented it would be
+to implement Comparable in the Ball class but that is bad
+
+Which of the above ways do you think is the best? Why?
+I went for option 1. And I didn't bother creating a new BallComparator() private class or anything, I just did an
+inline declare of a new Comparator that would accept Balls in its compare method, and then used that for Collections.sort()
+on an arraylist containing all the balls in Box, then returned an iterator to that. 
