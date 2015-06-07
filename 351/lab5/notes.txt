@@ -1,0 +1,93 @@
+
+Questions:
+how do we add another free block
+...how do we make sure theyre in the 'heap' seems like they
+will be on the stack instead and will be lost via scope.
+
+
+
+
+struct BlockInfo {
+  // Size of the block (in the high bits) and tags for whether the
+  // block and its predecessor in memory are in use.  See the SIZE()
+  // and TAG macros, below, for more details.
+  size_t sizeAndTags;
+  // Pointer to the next block in the free list.
+  struct BlockInfo* next;
+  // Pointer to the previous block in the free list.
+  struct BlockInfo* prev;
+};
+typedef struct BlockInfo BlockInfo;
+
+available methods + macros
+
+UNSCALED_POINTER_ADD(p, x)
+UNSCALED_POINTER_SUBTRACT(p, x)
+FREE_LIST_HEAD //pointer to head of the free list
+WORD_SIZE
+ALIGNMENT //alignment of blocks
+SIZE(x) //extracts size of sizeandtags field in blockinfo
+TAG_USED
+TAG_PRECEDING_USED
+searchFreeList(size_t reqSize) //find a free block of requested size in the list, returns null otherwise
+insertFreeBlock(BlockInfo * freeBlock) //inserts freblock at the head of the list, takes care of pointers. 
+removeFreeBlock(BlockInfo * freeBlock) //removes freeBlock from the list
+coalesceFreeBlock(BlockInfo * oldBlock) //merges oldblock with any surrounding free
+requestMoreSpace(size_t reqSize) //gets more space at least the size fo reqSize
+
+----Available in memlib.c----- //shouldnt really have to use
+
+mem_sbrk(int incr) // expands the heap by incr bytes
+mem_heap_lo() //returns a pointer to the first byte of the heap
+mem_heap_hi() //returns a pointer to the LAST byte of the heap
+mem_heapsize() //returns the current size of the heap
+mem_pagesize() //returns the size of a system page
+
+HOLY SHIT BLOCK INFO IS JUST THE HEADER...
+
+fuck so to make a free block we need to:
+make a block info
+	//make header
+		//sizeandtags = size, which should not be allocated, so it needs to be a multiple of 8 and the low order bit should be 0 because not allocated
+		//save into variable because going to use again for the footer
+	//set prev and next (should be taken care of by given methods)
+	//fill up rest of space by incrementing pointer? then setting last equal to the size and tags
+
+1 am ramble...
+  //returned blockinfo has no prev/next if its a mallocd object
+  //every time we malloc an object it seems like we need to bound it
+  //with free blocks too. 
+  //
+  //fucking structs.
+  //
+  //think this out:
+  //want to malloc a block
+  //no heap really, getfirstheap() will return null?
+  //add space for the aligned block starting at 0x8 with header at 0x4
+  //
+  //make blockinfo to return and then add also a blockinfo for the free space
+  //getfirstheap() points to freespace.next i think which points to null. this 
+  //block is just big enough to hold both headers and prev/next
+  //
+  //return pointer to malloced space
+  //
+  //k now i want to malloc another thing, say of the same size.
+  //can i use current free space? maybe at first allcoate i just allocate a big ass block.
+  //fuck do i need a free block at the front...? no.
+  //when i free a block it needs to be big enough to hold all the shit to make a free block
+  //soo... it needs to be at least...32 bytes? 2 header addresses, prev and next?///
+  //just... how do i stick these blocks in this spot? 
+  //
+  //way to do this may be to wrap each alloced block with free memory blocks
+  //then can sort of "reverse allocate"
+  //
+  //have one as a header and a footer.
+  //each alloc basically overwrites the footer and creates a new footer
+  //sets footers->header.lsb to 1
+  //fills it with whatever, slaps a footer on the footer, returns
+  //footer -> header + 1
+  //
+  //header free block may not even be necessary...
+  //if something gets freed, great, just convert block to free space.
+
+
