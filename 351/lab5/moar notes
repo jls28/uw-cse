@@ -1,0 +1,9 @@
+moar notes
+
+insert then coalesce.
+
+request more space actually adds a free block. 
+size(x) is size of the whole block, not just header.
+
+insert free block may just free a block for you??
+s

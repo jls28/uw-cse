@@ -1,0 +1,18 @@
+01040c address for smoke in the assembly code. check for addresses.
+add _56_ or 58? 54? chars and then return. just look at the stack.
+
+00 00 00 00 00 00 40 10 c0
+
+for the last part, i need to stick all 0s in the first param register, and then call bang, so
+
+movq $0, %rdi
+call 401020
+
+return adress should be 0xffffbe00 + amount of bytes the above args are
+0xffffbe0d
+
+get the rbp
+goes before the return
+have the return call my new function that sets rax to my cookie
+and then return 
+b570
