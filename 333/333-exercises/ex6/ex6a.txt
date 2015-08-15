@@ -1,0 +1,19 @@
+Stefan Dierauf
+1232328
+sdierauf@cs.washington.edu
+
+Answers to bitcoin questions
+
+What’s the root cause of the problem and the fix? Describe the system calls involved.
+
+There's a write() call that may span two sections of memory, and after it moves from
+the first section to the second section, the first section is fully discarded via 
+munmap() before being written to disk, and the data is lost. The fix is to simply
+force data to be written back to the disk before munmap()
+
+
+Would your program for helping Alice store her notes have the same problem? Explain why or why not.
+
+No. The issue arises from multithreaded buffering trickiness. Alice's program is
+single threaded and safe. As long as we make sure that whatever changes we make are synced correctly
+to disk, it would be hard to lose data unless the machine crashes in the middle of a synced write

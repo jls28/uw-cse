@@ -1,0 +1,199 @@
+% lec 5: system calls
+
+# today's plan
+
+- history
+- why operating systems
+- case study: syscalls on x86-64
+
+# history
+
+CTSS - Multics - Unix - BSD/Linux - Android/iOS
+
+# why do we need an OS
+
+- goal: help programs talk to hardware
+    - hide complexity
+    - run multiple programs
+    - share data
+    - isolate buggy/malicious programs
+- key techniques
+    - virtualization: address space/threads/...
+    - abstraction: interface to hard drive/network card/...
+
+# kernel
+
+- enforce modularity
+    - program vs kernel
+    - program vs program
+- interface to kernel: system calls
+    - a set of function calls
+
+is there a program that doesn't make any system calls?
+
+# overview
+
+``` {.ditaa #l05/overview}
++-------------+
+| application |
++-------------+  user space
+|    libc     |
++-------------+
+       ^
+       | syscall
+       v
++-------------+
+|   kernel    |  
++-------------+
+       ^
+       |
+       v
++-------------+
+|  hardware   |
++-------------+
+```
+
+# case study: Linux x86-64
+
+try strace with C & Java hello world
+
+```c
+#include <stdio.h>
+int main(void)
+{
+	printf("hello world!\n");
+	return 0;
+}
+```
+
+```java
+class HelloWorld {
+	public static void main(String[] args) {
+		System.out.println("hello world!");
+	}
+}
+```
+
+# examples of system calls
+
+- execve(filename, argv[], envp[])
+- write(fd, buf, count)
+- exit_group(status)
+- _exit(status)
+
+see also:
+[Linux system calls](http://man7.org/linux/man-pages/man2/syscalls.2.html)
+
+# how're system calls implemented
+
+example: `write`
+
+see [fs/read_write.c](https://github.com/torvalds/linux/blob/master/fs/read_write.c)
+
+# how to invoke system calls
+
+- x86-32: `int 0x80`, [CSE 351, lec 9], "Processes"
+- x86-64: `syscall` instruction
+    - [syscall number](https://github.com/torvalds/linux/blob/master/arch/x86/syscalls/syscall_64.tbl): `write` is 1
+    - syscall parameters: `write(fd, buf, count)`
+
+[CSE 351, lec 9]: http://courses.cs.washington.edu/courses/cse351/15wi/lectures/09-processes_wi15.pptx
+
+# x86-64 syscall calling convention
+
+excerpts from [AMD64 ABI](http://www.x86-64.org/documentation/abi.pdf), A.2.1
+
+- The kernel interface uses `%rdi`, `%rsi`, `%rdx`, `%r10`, `%r8` and `%r9`.
+
+- A system-call is done via the `syscall` instruction. The kernel destroys
+  registers `%rcx` and `%r11`.
+
+- The number of the syscall has to be passed in register %rax.
+
+- System-calls are limited to six arguments, no argument is passed directly on
+  the stack.
+
+- Returning from the syscall, register `%rax` contains the result of the
+  system-call. A value in the range between `-4095` and `-1` indicates an error,
+  it is `-errno`.
+
+# mini hello world
+
+```c
+write(1, "hello world!\n", 13);
+_exit(0);
+```
+
+syscall   register   description      value
+--------  ---------  ---------------  -----------------------------
+`write`   `%rax`     syscall number   1 (`__NR_write`)
+          `%rdi`     1st parameter    1 (stdout)
+          `%rsi`     2nd parameter    address of "hello world!\\n"
+          `%rdx`     3rd parameter    13 (size of above)
+`_exit`   `%rax`     syscall number   60 (`__NR_exit`)
+          `%rdi`     1st parameter    0
+
+# mini hello world
+
+```c
+#include <sys/syscall.h>
+#include <unistd.h>
+void _start(void) {
+	int fd = 1;
+	char buf[] = "hello world!\n";
+	size_t count = sizeof(buf) - 1;
+	asm volatile ("syscall"
+		: /* ignore output */
+		: "a"(__NR_write), "D"(fd), "S"(buf), "d"(count)
+		: "cc", "rcx", "r11", "memory"
+	);
+	asm volatile ("syscall"
+		: /* no output */
+		: "a"(__NR_exit), "D"(0)
+	);
+}
+```
+
+compile using "`gcc -nostdlib`" and try strace
+
+# libc: syscall wrappers
+
+- manually invoking syscalls is tedious & non-portable
+
+- libc provides syscall wrappers
+    - look like normal function calls
+    - examples: glibc, BSD libc, Bionic libc (Android)
+
+```c
+ssize_t write(int fd, const void *buf, size_t count);
+```
+
+# filesystem syscalls
+
+`man`/google/next lecture:
+
+- open
+- read
+- write
+- fsync
+- lseek
+- close
+
+see also: creat
+
+# libc: library functions
+
+libc provides higher-level library functions
+ 
+- example: how to print an integer in hex
+- `printf` will call `write` internally
+
+```c
+int printf(const char *restrict format, ...);
+```
+
+q1: how about Java's `System.out.println`?
+
+q2: how about Unix commands `ls`, `cat`, or `sed`?
+
+# no class Monday!

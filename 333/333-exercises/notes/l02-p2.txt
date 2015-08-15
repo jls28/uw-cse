@@ -1,0 +1,192 @@
+% lec 2: pointers, pointers
+
+# CSES 2015 today
+
+[2015 Computer Science & Engineering Symposium](https://cses.cs.washington.edu/)
+
+HUB 250
+
+# feedback
+
+- anonymous feedback: thanks! - really useful
+- feel free to yell at me _anytime_
+- if you prefer not to speak in class
+    - write down questions in class
+    - hand back questions after class & I'll answer in email
+- append `-lm` when using `pow()`
+
+# today's plan
+
+- review integers & pointers
+- review [CSE 351, lec 2], "memory & data"
+
+# valgrind
+
+- can I run valgrind on my Mac?
+    - you can, but the results are messy and not helpful
+    - try linux
+
+- struct and alignment
+
+[CSE 351, lec 2], slide 44
+
+esp. for ex2's bonus question
+
+# fixed-width integers
+
+- `int32_t` vs `int`
+    - `int` can be 16/32/... bits
+    - `int32_t` is guaranteed to be 32 bits
+    - `uint32_t`: same as `int32_t` but unsigned
+
+- `int64_t` vs `long`
+
+- how to print a `uint64_t`
+    - check macros defined in `<inttypes.h>`
+```c
+	uint64_t x = ...;
+	printf("%" PRIu64 "\n", x);
+```
+
+# pointer arithmetic
+
+`y` is an `int` stored at memory address 0x18 (24).
+
+```c
+int y = 0x3CD02700;
+int *p = &y;
+int *z = p + 3;
+```
+
+- what's the value of `z`?
+- what's the result of `z - p`?
+
+see also: [CSE 351, lec 2], slide 36
+
+# endianness
+
+[CSE 351, lec 2], slides 24--26
+
+. . .
+
+suppose you need to send a 16-bit integer to another machine over network.
+one option is to send it in the little-endian format.
+consider `0xbeef` (48,879).  send a packet of the following 2 bytes:
+
+- `0xef`
+- `0xbe`
+
+the receiver reconstructs `0xbeef` (48,879) from the packet.
+
+# self-exercise: sender
+
+```c
+#include <inttypes.h>
+#include <stdio.h>
+void encode(uint16_t x, uint8_t *buf) {
+	buf[0] = ...;
+	buf[1] = ...;
+}
+int main(void) {
+	uint16_t x = 0xbeef;
+	uint8_t buf[2];
+	encode(x, buf);
+	printf("%" PRIx16 " to little endian: %" PRIx8 " %" PRIx8 "\n",
+	       x, buf[0], buf[1]); 
+}
+```
+
+# self-exercise: receiver v0
+
+```c
+#include <inttypes.h>
+#include <stdio.h>
+uint16_t decode(const uint8_t *buf) {
+	return ...;
+}
+int main(void) {
+	uint8_t buf[2] = {0xef, 0xbe};
+	uint16_t x = decode(buf);
+	printf("%" PRIx16 " from little endian: %" PRIx8 " %" PRIx8 "\n",
+	       x, buf[0], buf[1]); 
+}
+```
+
+# self-exercise: receiver v1
+
+let's try to decode a 32-bit integer in little endian this time:
+
+```c
+#include <inttypes.h>
+#include <stdio.h>
+uint32_t decode(const uint8_t *buf) {
+	return ...;
+}
+int main(void) {
+	uint8_t buf[] = {0xef, 0xbe, 0xad, 0xde};
+	uint32_t x = decode(buf);
+	printf("%" PRIx32 " from little endian: "
+	       "%" PRIx8 " %" PRIx8 " %" PRIx8 " %" PRIx8 "\n",
+	       x, buf[0], buf[1], buf[2], buf[3]);
+}
+```
+
+# self-exercise: receiver v2
+
+now, suppose the receiver gets a packet stored at `buf`, of length `len`,
+where `len` can be any value (of its type).  the first 4 bytes of the packet
+is an integer in little endian.  reconstruct the integer.
+
+```c
+#include <inttypes.h>
+#include <stdio.h>
+uint32_t decode(const uint8_t *buf, uint32_t len) {
+	return ...;
+}
+int main(void) {
+	uint8_t buf[] = {0xef, 0xbe, 0xad, 0xde};
+	uint32_t x = decode(buf, sizeof(buf));
+	printf("result: %" PRIx32 "\n", x);
+}
+```
+
+# self-exercise: receiver v3
+
+- new packet format
+    - first 4 bytes: a 32-bit integer `n` in little endian
+    - followed by `n`-byte payload
+    - followed by the rest of the packet
+- return a pointer to the rest of the packet, or NULL on error
+
+```c
+const uint8_t *decode(const uint8_t *buf, uint32_t len) { ... }
+int main(void) {
+	uint8_t buf[] = {0xef, 0xbe, 0xad, 0xde};
+	const uint8_t *p = decode(buf, sizeof(buf));
+	if (!p)
+		printf("error!\n");
+}
+```
+
+# self-exercise: receiver v3 (cont.)
+
+```c
+const uint8_t *decode(const uint8_t *buf, uint32_t len)
+{
+	uint32_t n;
+	if (len < 4)
+		return NULL;
+	n = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+	if (len - 4 < n) /* is (len < n + 4) okay? */
+		return NULL;
+	return buf + 4 + n;
+}
+```
+
+# see you next Monday
+
+- next lecture: malloc & free
+- [CSE 351, lec 11], "memory allocation"
+
+[CSE 351, lec 2]: http://courses.cs.washington.edu/courses/cse351/15wi/lectures/02-memory-wi15.pptx
+[CSE 351, lec 11]: http://courses.cs.washington.edu/courses/cse351/15wi/lectures/11-memallocation_wi15.pptx

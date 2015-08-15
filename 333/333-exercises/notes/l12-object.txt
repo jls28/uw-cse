@@ -1,0 +1,206 @@
+% lec 12: C++ object model
+
+# administrivia
+
+midterm review Thursday
+
+midterm exam Friday, here
+
+# today's plan
+
+how does g++ implement: inheritance & virtual
+
+learn how to explore this question
+
+# single inheritance
+
+```c++
+class A {
+ public:
+  int a;
+};
+
+class B : public A {
+ public:
+  int b;
+};
+```
+```c++
+#include <iostream>
+int main() {
+  B x;
+  std::cout << &x.a << " " << &x.b << std::endl;
+  A *pa = &x;
+  std::cout << pa << " " << &x << std::endl;
+}
+```
+
+# inherited data
+
+``` {.ditaa #l12/single}
+  B x
++-----+ <---- &x.a, &x, pa
+|  a  |
++-----+ <---- &x.b
+|  b  |
++-----+
+```
+
+# multiple inheritance
+
+```c++
+struct A { int a; };
+
+struct B { int b; };
+
+struct C : public A, public B { int c; };
+```
+```c++
+#include <iostream>
+int main() {
+  C x;
+  std::cout << &x.a << " " << &x.b << " " << &x.c << std::endl;
+  A *pa = &x;
+  B *pb = &x;
+  C *pc = &x;
+  std::cout << pa << " " << pb << " " << pc << std::endl;
+}
+```
+
+# inherited data
+
+``` {.ditaa #l12/multiple}
+  C x
++-----+ <---- &x.a, pa, pc
+|  a  |
++-----+ <---- &x.b, pb
+|  b  |
++-----+ <---- &x.c
+|  c  |
++-----+
+```
+
+# virtual revisited
+
+[lec 10: example](l10-mapreduce.html#/example)
+
+```c++
+#include <iostream>
+
+struct A {
+  virtual void foo() { std::cout << "A" << std::endl; }
+};
+
+struct B : public A {
+  virtual void foo() override { std::cout << "B" << std::endl; }
+};
+
+int main() {
+  B b;
+  A *pa = &b;
+  pa->foo();
+}
+```
+how does g++ know which to invoke?
+
+# polymorphism in C
+
+Linux kernel:
+[struct file](https://github.com/torvalds/linux/blob/master/include/linux/fs.h#L804)
+
+``` {.ditaa #l12/file}
+  struct file            struct file_operations
++-------------+        +------------------------+
+|    . . .    |   +--> |         . . .          |   +--> xyz_write()
++-------------+   |    +------------------------+   |
+|    f_op     | --+    |         write          | --+
++-------------+        +------------------------+
+|    . . .    |        |         . . .          |
++-------------+        +------------------------+
+```
+
+# vtable example
+
+```c++
+#include <iostream>
+
+struct A {
+  virtual void foo() { std::cout << "A" << std::endl; }
+  virtual void bar() { }
+  void not_virtual();
+};
+
+struct B : public A {
+  virtual void foo() override { std::cout << "B" << std::endl; }
+};
+```
+
+`g++ -fdump-class-hierarchy -c`
+
+gdb: `info vtbl`
+
+. . .
+
+q: how does gdb implement this?
+
+# vtable
+
+``` {.ditaa #l12/vtbl}
+  A object          vtbl (A)
++----------+      +----------+
+| vtbl ptr | ---> |   foo    | ---> A's foo
++----------+      +----------+
+|  . . .   |      |   bar    | ---> A's bar
++----------+      +----------+          ^
+                                        |
+  B object          vtbl (B)            +-----+
++----------+      +----------+                |
+| vtbl ptr | ---> |   foo    | ---> B's foo   |
++----------+      +----------+                |
+|  . . .   |      |   bar    | ---------------+
++----------+      +----------+
+```
+
+q: what's the cost of calling a virtual function?
+
+# virtual destrutor
+
+```c++
+#include <iostream>
+
+struct A {
+  virtual void foo() { std::cout << "A" << std::endl; }
+  ~A() { std::cout << "~A" << std::endl; } // BAD
+};
+
+struct B : public A {
+  virtual void foo() override { std::cout << "B" << std::endl; }
+  ~B() { std::cout << "~B" << std::endl; }
+};
+```
+```c++
+int main() {
+  B *pb = new B;
+  A *pa = pb;
+  delete pa;
+}
+```
+what's the output? mark destructors as `virtual`!
+
+# how about just
+
+mark every method and destructor as `virtual`?
+
+performance
+
+see [pure virtual, `= default`, `= delete`](http://en.cppreference.com/w/cpp/language/destructor)
+
+# sum up
+
+understand the cost of C++ abstractions
+
+learn how to explore memory layout details
+
+see also "Inside the C++ Object Model" by Stanley B. Lippman
+
+# good luck with midterm!

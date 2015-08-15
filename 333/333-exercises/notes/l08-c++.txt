@@ -1,0 +1,348 @@
+% lec 8: C++ intro
+
+# administrivia
+
+no exercise before Wednesday
+
+hw1 due tomorrow
+
+extra office hour today 4--5
+
+# q1
+
+why not `fsync` after every `write`?
+
+performance
+
+# q2
+
+``` {.ditaa #l08/file-apis}
+                        +-------------------------------+
+                        | fopen/fread/fwrite/fclose/... |
++-------------------+   +-------------------------------+
+| mmap/munmap/msync |   |   open/read/write/close/...   |
++-------------------+   +-------------------------------+
++-------------------------------------------------------+
+|                        kernel                         |
++-------------------------------------------------------+
+```
+
+- fflush (`FILE *`) flushes libc cache to kernel
+- fsync (fd) flushes kernel cache to disk
+- fsync fopen()-ed file? use `fileno()` to get fd from `FILE *`
+
+# q3: `readdir` vs `readdir_r`
+
+```c
+struct dirent * readdir(DIR *dirp);
+```
+simple to use; thread safety issue.
+
+# q3: `readdir_r`
+
+```c
+int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+```
+
+```c
+struct dirent {
+	...
+	char d_name[256]; /* filename */
+};
+```
+
+```c
+struct dirent entry;
+readdir_r(dirp, &entry, ...);        /* BAD: long filename */
+```
+
+. . .
+
+```c
+name_max = pathconf(dirpath, _PC_NAME_MAX); /* large enough? */
+size_t len = offsetof(struct dirent, d_name) + name_max + 1;
+struct dirent *entryp = malloc(len); /* man readdir_r */
+readdir_r(dirp, entryp, ...);        /* BAD: race */
+```
+
+[`readdir_r` considered harmful](http://womble.decadent.org.uk/readdir_r-advisory.html);
+[how (not) to use readdir_r(3)](http://elliotth.blogspot.com/2012/10/how-not-to-use-readdirr3.html)
+
+# today's plan
+
+C++ history
+
+overview
+
+namespace & overloading
+
+# history
+
+desgined by [Bjarne Stroustrup](http://www.stroustrup.com/)
+([wav](http://www.stroustrup.com/pronounciation.wav))
+
+1979 - C with Classes, Cpre
+
+1983 - C++, Cfront
+
+1990 - Annotated C++ Reference Manual, Turbo C++
+
+1993 - Standard Template Library (STL)
+
+1998 - C++98, first C++ standard
+
+2011 - C++11 (C++0x), boost
+
+2014 - C++14
+
+# C++ compilers
+
+- early compilers: translate C++ to C
+    - Cpre/Cfront
+- modern compilers
+    - gcc (g++), clang (clang++), Microsoft Visual C++, Intel's icc, ...
+
+# software written in C++
+
+- browsers: Chrome, Firefox, Safari
+- compilers: gcc, clang/llvm, v8 (javascript)
+- office suites, storage, distributed systems
+- OS kernels (less popular): XNU's I/O Kit, L4
+
+# some of my college life
+
+- [an interview with Bjarne Stroustrup](http://www.stroustrup.com/01chinese.html)
+- [an interview with Nead Stefanovic (WTL)](http://www.cprogramdevelop.com/4882702/)
+
+![](l08/c++view3.png)
+![](l08/c++view6.png)
+
+# overview
+
+> C++ is a general purpose programming language with a bias towards systems programming that
+> 
+> - is a better C
+> - supports data abstraction
+> - supports object-oriented programming
+> - supports generic programming.
+
+-- <http://www.stroustrup.com/C++.html>
+
+# C++: a direct descendant of C
+
+- most C syntax: `main`, primitive types, pointers
+- still unsafe: buffer overflow, use-after-free, ...
+- headers: .h (some prefer .hh or .hpp)
+- sources: .cc (some prefer .cpp or .cxx)
+- differences
+    - `nullptr` (vs `NULL`)
+    - `new`/`delete` (vs `malloc`/`free`)
+    - no need to repeat `struct`
+    - "strict" type casts
+    - ...
+
+# classes & objects
+
+- classes
+    - public, private, and protected methods and instance variables
+    - (multiple!) inheritance
+- polymorphism
+    - static polymorphism: multiple functions or methods with the same
+      name, but different argument types (overloading)
+    - dynamic (subtype) polymorphism: derived classes can override
+      methods of parents, and methods will be dispatched correctly
+
+# templates
+
+parametric polymorphism / generics
+
+example: vector of ints, floats, and vectors of floats
+```c++
+vector<int> x;
+vector<float> y;
+vector<vector<float>> z;
+```
+
+# C++ standard library
+
+C standard library
+
+containers: bitset, list, queue, set, stack, hashtable, vector, ...
+
+strings & regular expressions
+
+I/O streams
+
+multithreading
+
+many more ...
+
+# advice on learning C++
+
+C++ is huge and evolving
+
+can easily hurt yourself & go wrong
+
+get your hands dirty and write more code
+
+use tools: compile warnings, cpplint.py, valgrind
+
+_think how each C++ feature can be implemented in C_
+
+# namespace
+
+two C++ libraries: libx and liby
+
+- libx provides function `foo()` and `struct Pair`
+    - declared in `libx.h`, defined in `libx.cc`
+
+- liby provides a different `foo()` and `struct Pair`
+    - declared in `liby.h`, defined in `liby.cc`
+
+- `test.cc` includes both `libx.h` and `liby.h`
+
+# name conflict
+
+```bash
+$ make CXX=g++
+g++    -c -o test.o test.cc
+In file included from test.cc:2:
+./liby.h:3:8: error: redefinition of 'Pair'
+struct Pair {
+       ^
+./libx.h:3:8: note: previous definition is here
+struct Pair {
+       ^
+1 error generated.
+```
+
+C solution: add prefix: "libx_" and "liby_" to structs/functions
+
+[C++ solution: enclose structs/functions with namespace](l08/namespace/)
+
+q: what does g++ actually do?
+
+# name mangling
+
+```bash
+$ nm libx.o
+... T __ZN4libx3fooEv
+```
+
+```bash
+$ nm liby.o
+... T __ZN4liby3fooEv
+```
+. . .
+
+use `c++filt`
+
+```bash
+$ nm libx.o | c++filt
+... T libx::foo()
+```
+
+```bash
+$ nm liby.o | c++filt
+... T liby::foo()
+```
+
+g++ prepends namespace to function names
+
+# function overloading
+
+```c
+void foo(char y) { }
+void foo(int x)  { }
+```
+
+q1: does this work in C? no - conflict!
+
+q2: how does the C++ compiler implement this?
+
+. . .
+
+use `nm`
+
+```bash
+... T __Z3fooc
+... T __Z3fooi
+```
+
+# implications
+
+[name mangling](http://en.wikipedia.org/wiki/Name_mangling):
+C++ compiler changes function names
+
+- avoid name conflicts (for namespace & overloading)
+- `g++`: `void foo(int x)` → `__Z3fooi`
+- `gcc`: `void foo(int x)` → `_foo`
+
+q: is return type encoded?
+
+q: define two C++ functions that differ only by return type?
+
+q: compile `*.cc` using different C++ compilers?
+
+# use C and C++ together
+
+- a.h: declare `void foo(void)`
+- a.c: define `foo()`
+- test.cc: include `a.h` and call `foo()`
+
+. . .
+
+invoke C function in C++: `extern "C"`
+
+[soln](l08/extern/)
+
+# operator overloading
+
+```c++
+struct point {
+        int x, y;
+};
+
+point point_add(point a, point b) {
+        point c = {a.x + b.x, a.y + b.y};
+        return c;
+}
+```
+
+. . .
+
+customize operators: `+`, `-`, `<<`, `>>`, ...
+
+improve code readability: "`point_add(px, py)`" vs "`px + py`"
+
+be consistent & reasonable: don't define + as -
+
+# hello 42: C vs C++
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv) {
+  const char *s = "hello";
+  int x = 42;
+  printf("%s %d\n", s, x);
+  return EXIT_SUCCESS;
+}
+```
+
+```c++
+#include <iostream>
+#include <cstdlib>
+int main(int argc, char **argv) {
+  std::string s = "hello";
+  int x = 42;
+  std::cout << s << " " << x << std::endl;
+  return EXIT_SUCCESS;
+}
+```
+
+# see you on Wednesday
+
+in-class exercises
+
+bring laptop or pen & paper

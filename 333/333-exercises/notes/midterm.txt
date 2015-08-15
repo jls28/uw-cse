@@ -1,0 +1,61 @@
+General C
+
+pass by ref vs val
+
+pointer arithmetic
+
+casting
+
+sizes of various types
+
+
+Endianness
+0xabc5e333
+BE: ab c5 e3 33
+LE: 33 e5 c5 ab
+    05 06 07 08
+
+Malloc/free
+
+
+Memory Management
+
+Memory leaks
+
+lifetime of data
+
+
+I/O and buffering
+
+which IO calls buffer to where
+  write: goes to kernel buffer <- kernel
+  fwrite: goes to C library buffer 
+  fflush: flushes library buffer to kernel
+  fsync: flushes to disk 
+  sync: kernel 
+  close : data NOT written to disk
+
+C++
+  syntax:
+  const, type signatures
+  const method
+  can always upgrade to const, cant downgrade from const
+  if passing a const object ref, any object.method()s called need to also be const
+  operator overloading
+  inheritance
+
+  want to make destructors virtual
+  class base {
+  ~base();
+  }
+  class dirived: public base {
+  ~derived();
+  };
+
+  Base * b = new Derived();
+  delete b;
+  ~~~base destrcutor will get called if destructor not virtual~~~
+  if virtual, looks
+
+  initializer lists
+  

@@ -1,0 +1,284 @@
+% lec 3: malloc & free
+
+# administrivia
+
+- hw1 out tomorrow, due in two weeks---start early!
+- access to dropbox
+- how many went to 8:30 last Thursday?
+- ex0/1 grades
+- pointers
+    - sections this Thursday; self-exercises
+    - google for "C pointer exercises" and do as many as you can
+- function calls
+    - [CSE 351, lec 6], "procedures & stacks"
+    - CSE 351's `bufbomb` or MIT 6.033's
+      [buffer overrun hands-on](http://web.mit.edu/6.033/www/assignments/handson-stack.html)
+
+# feedback
+
+- anonymous: upload section slides w/ valgrind/makefile
+    - sections slides are available on the course website
+    - check out hw0, or talk to us
+- [export slides to pdf](pdf.html)
+- never saw big-endian (PowerPC) computers
+    - Apple iBook & PowerBook
+    - Xbox 360, Wii & Wii U, PlayStation 3
+    - Curiosity (Mars rover), Deep Blue (vs. Kasparov), ...
+    - [emulator](ppc.html)
+
+# Curiosity Mars rover
+
+![courtesy NASA/JPL-Caltech & Wikimedia Commons](l03/curiosity.jpg)
+
+# casting vs. endianness
+
+```c
+#include <inttypes.h>
+#include <stdio.h>
+#include <string.h>
+int main(void)
+{
+	uint16_t x = 0xbeef;
+	uint8_t a, b;
+
+	a = (uint8_t)x;
+	b = *(uint8_t *)&x;
+
+	printf("%" PRIx8 " %" PRIx8 "\n", a, b);
+}
+```
+. . .
+
+- `a`: always `0xef`
+- `b`: depends on endianness
+
+# today's plan
+
+- review [CSE 351, lec 11], "memory allocation"
+- overview: static, automatic, and dynamic allocation
+- C memory allocators
+
+# why dynamic memory allocation
+
+- suppose we want to
+    - read a 4-byte integer `n` from network
+    - continue to read `n` bytes
+    - `n` is _not_ known in advance
+
+- suppose we want to
+    - load the content of a file into memory
+    - the file size is _not_ known in advance
+
+# malloc
+
+```c
+void *
+malloc(size_t n);
+```
+
+- request
+    - I'd like to reserve a virtual address range of `n` bytes
+    - I don't care about the start address
+- return `ptr`
+    - virtual address range `[ptr, ptr + n)` is now yours
+    - the content is _uninitialized_; write to the range before read
+    - free the range when you don't need it anymore
+- return `NULL`
+    - out of memory: you'd better have a plan or just panic
+
+# free
+
+```c
+void
+free(void *ptr);
+``` 
+
+- request
+    - take back the virtual address range starting from `ptr`
+    - I'm _not_ telling you the size; figure that out yourself
+- I promise
+    - `ptr` is a return value from `malloc`/`calloc`/`realloc`
+    - `ptr` has never been freed before
+    - I'm _not_ going to use the range after this point
+- see also: `calloc`, `realloc`
+
+# example (partly from CSE 351)
+
+```c
+/* allocate a block of n ints: [0, n-1] */
+int *foo(size_t n) {
+	size_t i;
+	int *p = malloc(n * sizeof(int));
+	if (p == NULL)
+		return NULL;
+	for (i = 0; i < n; i++)
+		p[i] = i;
+	return p;
+}
+void bar(size_t n) {
+	int *p = foo(n);
+	...
+	free(p);
+}
+```
+what if `n` is a very large integer?
+
+# self-exercise: malloc_array
+
+```c
+/**
+ * malloc_array - allocate memory for an array.
+ *  n:    number of elements.
+ *  size: element size.
+ */
+void *malloc_array(size_t n, size_t size)
+{
+	???
+	return malloc(n * size);
+}
+```
+
+assume the maximum value of `size_t` is `SIZE_MAX`
+
+see also:
+[kmalloc_array](http://lxr.free-electrons.com/ident?i=kmalloc_array),
+[reallocarray](http://cvsweb.openbsd.org/cgi-bin/cvsweb/~checkout~/src/lib/libc/stdlib/reallocarray.c?content-type=text/plain), and
+[dlcalloc](https://github.com/android/platform_bionic/blob/master/libc/upstream-dlmalloc/malloc.c)
+
+# static/automatic/dynamic alloc
+
+```c
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+char gvar[128];
+int main(void) {
+	char buf[64];
+	void *ptr = malloc(32);
+
+	printf("gvar: %p\n", gvar);
+	printf("buf:  %p\n", buf);
+	printf("ptr:  %p\n", ptr);
+
+	printf("main: %p\n\n", main);
+	snprintf(buf, sizeof(buf), "cat /proc/%d/maps", getpid());
+	return system(buf);
+}
+```
+lifetime of `gvar`, `buf`, and `ptr`?
+
+# lifetime
+
+        allocation type   lifetime
+------  ----------------- ------------------------------
+`gvar`  static (global)   the entire program execution
+`buf`   automatic (local) between function entry & exit
+`ptr`   dynamic           between malloc & free
+
+can overflow happen?
+
+see [Toyota unintended acceleration lawsuit](http://embeddedgurus.com/state-space/2014/02/are-we-shooting-ourselves-in-the-foot-with-stack-overflow/)
+
+# memory allocators
+
+- malloc & free
+    - good control
+    - unsafe and hard to use: leak, use-after-free, double free
+    - valgrind is your friend
+    - performance: glibc's malloc vs Google's
+                   [tcmalloc](http://goog-perftools.sourceforge.net/doc/tcmalloc.html)
+    - security: [OpenBSD's malloc](http://www.openbsd.org/cgi-bin/man.cgi?query=malloc) and
+                [more defenses](http://www.openbsd.org/papers/eurobsdcon2009/otto-malloc.pdf)
+
+- other memory management schemes
+
+# garbage collection
+
+- example: [libgc/Boehm GC](http://www.hboehm.info/gc/)
+
+- easy to use
+    - just call `malloc()`
+    - no need to call `free()` anymore
+    - fewer bugs
+
+- less control: unpredictable pause
+
+# reference counting
+
+examples: Objective-C, file descriptors, C++'s `shared_ptr`
+
+```objective-c
+NSArray *arr = [ [ NSArray alloc ] init ]; // counter: 1
+[arr retain];                              // counter: 2
+[arr release];                             // counter: 1
+[arr release];                             // counter: 0, freed
+```
+
+- each object has a counter, initially 1
+- `retain`: counter incremented by 1
+- `release`: counter decremented by 1
+- freed when counter reaches 0
+
+# regions (pools)
+
+examples: Apache web server, Subversion
+
+```c
+apr_pool_t *pool;
+apr_pool_create(&pool, NULL);
+...
+char *buf = apr_palloc(pool, 128);
+long *arr = apr_palloc(pool, sizeof(long) * 10);
+...
+apr_pool_destroy(pool);
+```
+
+- `apr_palloc(pool, n)`: allocate n bytes from pool
+- `apr_pool_destroy(pool)`: free the entire pool
+- no individual free
+
+# self-exercise
+
+write and test a program that defines:
+
+- a new struct type `Point`
+    - represent it with `float`s for the x, y coordinate
+- a new struct type `Rectangle`
+    - assume its sides are parallel to the x-axis and y-axis
+    - represent it with the bottom-left and top-right `Point`s
+- a function that computes/returns the area of a `Rectangle`
+- a function that tests whether a `Point` is in a `Rectangle`
+
+see [solution](l03/ex1.html)
+
+# self-exercise
+
+```c
+typedef struct complex_st {
+	double real; // real component
+	double imag; // imaginary component
+} Complex;
+
+typedef struct complex_set_st {
+	int num_points_in_set;
+	Complex *points; // an array of Complex
+} ComplexSet;
+
+ComplexSet *AllocSet(Complex c_arr[], int size) { ... }
+void FreeSet(ComplexSet *set) { ... }
+```
+
+`AllocSet` needs to use `malloc` twice: to allocate a
+`ComplexSet`, and to allocate `points` inside it;
+`FreeSet` needs to use free twice
+
+see [solution](http://courses.cs.washington.edu/courses/cse333/14wi/lectures/lec04_exercises/exercise2.c.html)
+
+# see you on Wednesday
+
+- review [CSE 351, lec 7], "arrays & structs" (including `typedef`)
+- next lecture: data structures
+
+[CSE 351, lec 6]: http://courses.cs.washington.edu/courses/cse351/15wi/lectures/06-procedures_wi15.pptx
+[CSE 351, lec 7]: http://courses.cs.washington.edu/courses/cse351/15wi/lectures/07-arrays_wi15.pptx
+[CSE 351, lec 11]: http://courses.cs.washington.edu/courses/cse351/15wi/lectures/11-memallocation_wi15.pptx

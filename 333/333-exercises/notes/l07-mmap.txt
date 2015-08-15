@@ -1,0 +1,152 @@
+% lec 7: mmap
+
+# today's plan
+
+- `mmap`/`munmap`/`msync`
+- `fsync` revisited
+
+# problem
+
+> Corruption: block checksum mismatch or missing start of fragmented record(2)
+
+use gdb to find the bug?
+
+# background
+
+LevelDB: key-value store
+
+by Jeff Dean & Sanjay Ghemawat at Google
+
+used in Bitcoin, Chrome, Facebook (RocksDB), ...
+
+# sequential writes in leveldb
+
+operations:
+put("alice", 10); put("bob", 20); put("alice", 30)
+
+in-memory:
+``` {.ditaa #l07/kv}
++-------+----+     +-------+----+     +-------+----+
+| alice | 10 |     | alice | 10 |     | alice | 30 |
++-------+----+     +-------+----+     +-------+----+
+                   |  bob  | 20 |     |  bob  | 20 |
+                   +-------+----+     +-------+----+
+```
+
+. . .
+
+on-disk (simplified):
+``` {.ditaa #l07/kv-log}
++------------------+----------------+------------------+
+| put("alice", 10) | put("bob", 20) | put("alice", 30) |
++------------------+----------------+------------------+
+```
+
+# mmap interface
+
+```c
+void *mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
+int munmap(void *addr, size_t len);
+int msync(void *addr, size_t len, int flags);
+```
+
+map a file into virtual address space
+
+pointer read/write → file read/write
+
+```c
+int fd = ...;               // open a file
+size_t len = ...;           // file length
+char *p = mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+printf("%c\n", p[len - 1]); // read the last byte
+*p = 'c';                   // write the first byte, "dirty"
+munmap(p, len);
+```
+
+# self-exercise
+
+print file content to screen using `mmap`
+
+how about using `read` instead of `mmap`?
+
+[soln](l07/cat-mmap.c)
+
+. . .
+
+# what happened to Bitcoin
+
+leveldb uses `mmap`/`munmap` to append data to file
+
+OS X's `munmap` didn't flush the tail to disk - corruption
+
+# how to fix
+
+blog author:
+`msync` to force kernel to flush dirty pages to disk
+
+leveldb authors:
+avoid using `mmap`/`munmap` altogether
+
+q: why no problem on Linux?
+
+> MAP_SHARED . . .
+> The file may not actually be updated until msync(2) or munmap() is called.
+
+-- Linux "`man mmap`"
+
+# who is to blame
+
+Bitcoin / leveldb / Linux / OS X / POSIX / others?
+
+> If the mapping maps data from a file (MAP_SHARED), then the memory
+> will eventually be written back to disk if it's dirty.  This will
+> happen automatically at some point in the future (implementation
+> dependent).  Note: to force the memory to be written back to the
+> disk, use msync(2).
+
+-- OS X manpage
+
+# excellent answer
+
+> The root cause of the bitcoin data corruption bug was that different operating systems made different promises to callers of the same syscalls. While Linux (which leveldb was probably developed and tested on) made a contractual promise to never discard unmapped dirty pages - which the user was not currently writing to, but were not synced/flushed with the disk yet (hence the name 'dirty'), Mac OS X never made that promise. Therefore, the same code that run correctly on Linux will sometimes not work on Mac OS X ... And in this case, unfortunately, POSIX does not make a promise to not discard pages after munmap is called on them.
+
+-- Roee Avnon
+
+# not-quite-right answers
+
+multiple threads caused the bug?
+
+didn't invoke the `fwrite` syscall?
+`fsynch`? `fsync`? `sync`?
+
+user-space cache not flushed to kernel?
+
+> neither I nor Alice has a Mac.
+
+# update a file
+
+> fd = create "notes.tmp" under "/home/alice"
+> 
+> write(fd, content, length)
+> 
+> close(fd)
+> 
+> rename("notes.tmp", "notes")
+
+q: do we need `fsync(fd)` before `close`?
+
+see also: [ext4 and data loss](http://lwn.net/Articles/322823/)
+
+FYI: google "Eat My Data: How everybody gets file I/O wrong"
+
+q: call `fsync` after every `write`?
+
+works, but has performance issues.
+
+# next week: C++
+
+> C++ is a horrible language. It's made more horrible by the fact
+> that a lot of substandard programmers use it, to the point where
+> it's much much easier to generate total and utter crap with it.
+
+-- [Linus Torvalds](http://article.gmane.org/gmane.comp.version-control.git/57918)

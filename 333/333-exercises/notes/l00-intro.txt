@@ -1,0 +1,276 @@
+% lec 0: intro & primitive types
+
+# today's plan
+- course syllabus
+- quick C refresher: primitive types
+
+# staff
+- Xi Wang (instructor)
+- Sunjay Cauligi (TA)
+- Renshu Gu (TA)
+- Sixto Josue Rios (TA)
+- Edward Wu (TA)
+
+email: `cse333-staff@cs`
+
+# course goals
+
+- programming: C/C++
+- systems: talk to the OS
+    - file system, networking, process & thread, ...
+- tools: building, debugging, testing, performance tuning
+- discipline: good coding style
+- curiosity & courage: dealing with uncertainty
+
+# why C/C++
+
+- when you want
+    - high, predictable performance
+    - low resource consumption
+    - interaction with low-level hardware
+    - examples?
+- know when to avoid C/C++: examples?
+
+# lectures & sections
+
+- lectures: MWF 11:30-12:20, here
+    - readings: Unix, Bitcoin, MapReduce, ...
+    - read the paper before lecture
+- sections: Thu 8:30 (!), 9:30, 10:30, not here
+- take notes
+- learning by practicing
+    - you cannot learn programming by reading slides
+    - systems programming will take you a lifetime to learn
+
+# programming projects
+
+- 4 of them, successively building on each other, plus a warmup
+- 4 late days, 2 max per project
+- save them for emergencies
+
+# programming exercises
+
+- one per lecture, due before the next lecture begins
+- coarse-grained grading (0/1/2/3)
+- paper questions: do your best
+- _no_ late days
+
+# exams (sorry!)
+
+- midterm: Feb 6 (to avoid conflicts with other CSE classes)
+- final: Mar 18
+- open notes, open laptop, but no wifi, no collaboration
+
+# academic integrity
+
+- read the details on the course website
+- I trust you implicitly; I will follow up if that trust is violated
+- the rules boil down to:
+    - don't attempt to gain credit for something you didn't do
+    - don't help others to do so
+- that does not mean suffer in silence
+    - you have colleagues, instructor, TAs
+    - work with them; learn from each other!
+
+* * * * * *
+
+# quick C refresher
+
+- [developed by Dennis Ritchie in the early 1970s][chist]
+- was designed to write the Unix operating system
+- current standard: C11
+- popular for decades
+
+year    2014    2009    2004    1999    1994    1989    1984
+----   -----   -----   -----   -----   -----   -----   -----
+rank       1       2       1       1       1       1       1
+
+Table: C in [TIOBE index] (popularity of programming languages)
+
+[chist]: http://cm.bell-labs.com/cm/cs/who/dmr/chist.html
+[TIOBE index]: http://www.tiobe.com/index.php/content/paperinfo/tpci/
+
+# primitive types in C
+
+- boolean type
+    - `_Bool`
+- integer types
+    - see next
+- real floating types
+    - `float`, `double`, `long double`
+- complex types
+    - `float _Complex`, `double _Complex`, `long double _Complex`
+
+# integer types
+
+- `char` can be either signed or unsigned
+- signed & unsigned integer types
+
+signed integer types    unsigned integer types
+--------------------    ----------------------
+`signed char`           `unsigned char`
+`short`                 `unsigned short`
+`int`                   `unsigned int`
+`long`                  `unsigned long`
+`long long`             `unsigned long long`
+
+# integer ranges
+
+- no exact range
+    - use macros in `<limits.h>`: `INT_MIN`, `INT_MAX`, ...
+    - use fixed-width types in `<stdint.h>`: `int32_t`, `uint32_t`, ...
+- unsigned integer operations can overflow: two's complement
+    - example: `UINT_MAX + 1` produces 0
+
+# undefined = illegal C code
+
+- `i = 42; j = i++ + i++;`
+- _never_ divide by zero
+- signed integer operations must _never_ overflow
+    - example: `INT_MAX + 1` is undefined
+- shift count must _never_ exceed the width of type
+    - otherwise undefined!
+
+# example: shift count too large
+
+```c
+#include <stdint.h>
+#include <stdio.h>
+int main(void)
+{
+	uint32_t x = 1;
+	printf("%d %d\n", x << 32, x >> 32);
+}
+```
+
+what's the output?
+
+. . .
+
+> Permissible undefined behavior ranges from ignoring the situation
+> completely with unpredictable results, to having demons fly out of
+> your nose.
+
+* * * * * *
+
+# exercise: left-shift and mul
+
+```c
+int shl_1(int x)
+{
+	return x << 1; 
+}
+```
+
+```c
+int mul_2(int x)
+{
+	return x * 2;
+}
+```
+
+are they equivalent? if so, which is faster?
+
+# exercise: right-shift and div
+
+```c
+int shr_1(int x)
+{
+	return x >> 1; 
+}
+```
+
+```c
+int div_2(int x)
+{
+	return x / 2;
+}
+```
+
+are they [equivalent](http://hdl.handle.net/1721.1/6090)? if so, which is faster?
+
+. . .
+
+how about replacing every `int` with `unsigned int`?
+
+# exercise: complete `average`
+
+```c
+unsigned int average(unsigned int x, unsigned int y)
+{
+	???
+}
+```
+
+compute the average value of `x` and `y`.
+
+hint: `(x + y) / 2` may not work given large `x` and `y`.
+
+. . .
+
+- [Nearly All Binary Searches and Mergesorts are Broken](http://googleresearch.blogspot.com/2006/06/extra-extra-read-all-about-it-nearly.html)
+
+- if you are interested in bit tricks, see Hacker's Delight,
+  [2-5 "Average of Two Integers"](http://www.hackersdelight.org/basics2.pdf)
+
+# exercise: complete `div_long`
+
+```c
+void div_long(long x, long y)
+{
+	???
+	printf("the result is %ld\n", x / y);
+}
+```
+
+some `x`, `y` may cause the division to fail.
+
+add sanity check(s) to avoid that.
+
+. . .
+
+- `y == 0`
+- `x == LONG_MIN && y == -1`
+
+see also <http://blog.regehr.org/archives/887>
+
+# self-exercise: find & fix the bug
+```c
+#include <stdio.h>
+static unsigned char read_status(void) {
+	if (!check_status())
+		return -1;
+	...
+}
+void foo(void) {
+	int status = read_status();
+	if (status == -1)
+		printf("bad status!\n");
+}
+```
+
+hint: what happens when holding `unsigned char` using `int`?
+
+see also
+  [integer conversion rules](https://www.securecoding.cert.org/confluence/display/seccode/INT02-C.+Understand+integer+conversion+rules) and
+  [one related bug](http://git.kernel.org/linus/91762057)
+
+
+# summary
+
+- working with C primitive types requires a lot of care
+    - involve OS/compiler/hardware
+    - signed vs. unsigned
+    - overflow
+    - never trigger undefined behavior
+- compiler warnings are your friends
+- will come back to this later
+
+# see you on Wednesday
+
+- [exercise 0] is due
+- [homework 0] is out
+- next lecture: pointers & memory
+
+[exercise 0]: http://courses.cs.washington.edu/courses/cse333/15wi/exercises/ex00.html
+[homework 0]: http://courses.cs.washington.edu/courses/cse333/15wi/hw/hw0/

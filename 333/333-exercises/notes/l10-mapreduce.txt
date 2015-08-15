@@ -1,0 +1,189 @@
+% lec 10: MapReduce
+
+# administrivia
+
+hw2 out (step 1 readdir)
+
+midterm: next Friday; review next Thursday
+
+next reading: [The Night Watch](http://courses.cs.washington.edu/courses/cse333/15wi/papers/night-watch.html)
+
+# today's plan
+
+inheritance & virtual functions
+
+MapReduce
+
+# inheritance
+
+review [CSE 143](http://courses.cs.washington.edu/courses/cse143/12au/notes/notes16.html)
+
+"is-a" relationship between classes
+
+code reuse & extensibility
+
+# example
+
+```c++
+class A {
+public:
+	virtual void foo() {
+		std::cout << "A" << std::endl;
+	}
+};
+
+class B : public A {
+public:
+	virtual void foo() override {
+		std::cout << "B" << std::endl;
+	}
+};
+```
+
+`virtual`
+
+override controls: `override` & `final`
+
+# dynamic & static dispatch
+
+```c++
+...
+int main() {
+	A a;
+	B b;
+	A *p = &b;
+	A &r = b;
+	a.foo();
+	b.foo();
+	p->foo();
+	r.foo();
+}
+```
+
+q: what's the output?
+
+. . .
+
+q: what if we remove all the `virtual`s (and `override`)?
+
+# MapReduce
+
+large-scale distributed data processing at Google
+
+inspired by functional programming
+
+OSDI 2004, by Jeff Dean and Sanjay Ghemawat
+
+other Google systems: GFS, BigTable, Spanner, ...
+
+influence: Hadoop, Dryad, Spark, ...
+
+(Feb 26, CSE distinguished lecture series, Jeff Dean)
+
+# programming model
+
+split input -> (k1, v1)'s
+
+map(k1, v1) → list (k2, v2)
+
+shuffle map output to reduce
+
+reduce (k2, list (v2)) → list (v3)
+
+collect reduce output
+
+# word count
+
+```python
+map(name, doc):
+	for word in doc:
+		emitIntermediate(word, "1")
+
+reduce(word, counts):
+	result = 0
+	for c in counts:
+		result += int(c)
+	emit(word, str(result))
+```
+
+programmers extend Mapper and Reducer classes
+
+implement the two virtual functions
+
+the MapReduce library invoke the two functions
+
+# word count example
+
+[input document](l06-file.html#/hows-hw1-going)
+
+> You wake up, segfaults
+>
+> Post up, segfaults
+>
+> Ride round in it, segfaults
+>
+> Flossin on that, segfaults
+
+M = 4 mappers, R = 2 reducers
+
+partitioning function: strlen(w) mod 2
+
+# workflow
+
+user program splits input into M pieces
+
+the master picks M mappers and R reducers
+
+each mapper partitions output to R pieces & notifies the master
+
+the master notifies reducers to read data from mappers
+
+each reducer notifies the master when done
+
+the master notifies user program
+
+# performance
+
+number of jobs: M + R
+
+input/output to GFS
+
+disk I/O
+
+network: M mappers to R reduces
+
+stragglers: replicate - run backup tasks (Figure 3)
+
+see also: electricity & cooling; Facebook data center in Sweden
+
+[video1](https://www.youtube.com/watch?v=ZR7dXefmDtw),
+[video2](https://www.youtube.com/watch?v=C8QCHBvuT8k),
+[Bloomberg](http://www.bloomberg.com/bw/articles/2013-10-03/facebooks-new-data-center-in-sweden-puts-the-heat-on-hardware-makers)
+
+# failure
+
+commodity machines
+
+assumption: workers are fail-stop (may reboot)
+
+no malicious machines
+
+what happens if mapper/reducer/master/network fails?
+
+earthquake (all machines in one datacenter down)?
+
+# deal with failures
+
+rerun: TCP, map-reduce
+
+replicate: GFS
+
+why okay to rerun: functional - the same output!
+
+# improvements
+
+language (other than C++/Java): Sawzall, Pig, SCOPE, ...
+
+model: what computations cannot be expressed?
+
+[further readings](http://courses.cs.washington.edu/courses/cse333/15wi/papers/mapreduce.html)
