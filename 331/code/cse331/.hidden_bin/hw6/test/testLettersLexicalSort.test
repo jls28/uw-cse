@@ -1,4 +1,0 @@
-# Should go through y instead of z
-
-LoadGraph letters letters.tsv
-FindPath letters a g

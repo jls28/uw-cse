@@ -1,4 +1,0 @@
-CreateGraph g1
-AddNode g1 n1
-AddNode g1 n2
-AddNode g1 n3

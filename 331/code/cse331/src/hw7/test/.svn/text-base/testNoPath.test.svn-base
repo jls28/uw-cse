@@ -1,2 +1,0 @@
-LoadGraph letters letters.tsv
-FindPath letters yellow a

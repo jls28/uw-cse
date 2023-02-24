@@ -1,7 +1,0 @@
-# Verify that the program correctly outputs two unknown buildings
-r
-UNKNOWN
-IDONTKNOWW
-
-# All of your test scripts should end with q to terminate the program.
-q

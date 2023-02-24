@@ -1,3 +1,0 @@
-LoadGraph letters letters.tsv
-AddEdge letters a b 10.0
-FindPath letters a b

@@ -1,4 +1,0 @@
-# Should go through edge 'vowel' instead of edge 'xoxo'
-
-LoadGraph letters letters.tsv
-FindPath letters a g

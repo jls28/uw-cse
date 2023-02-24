@@ -1,8 +1,0 @@
-Stefan Dierauf
-
-Why did Fibonacci fail the testThrowsIllegalArgumentException test? What (if anything) did you have to do to fix it?
-	because it threw when n <= 0, and n == 0. Changed first if statement to be n < 0
-Why did Fibonacci fail the testBaseCase test? What (if anything) did you have to do to fix it?
-	it had <= 2 instead of < 2. Corrected
-Why did Fibonacci fail the testInductiveCase test? What (if anything) did you have to do to fix it?
-	inductive cases were getting subtracted instead of added. fixed. 

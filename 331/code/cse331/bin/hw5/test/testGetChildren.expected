@@ -1,5 +1,0 @@
-created graph g1
-added node n1 to g1
-added node n2 to g1
-added edge COOLEDGE from n1 to n2 in g1
-the children of n1 in g1 are: n2(COOLEDGE)
