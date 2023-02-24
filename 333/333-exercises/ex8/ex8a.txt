@@ -1,5 +1,0 @@
-1. The WordCounters are used during the mapping phase, the Adders are used during the reducing phase
-(assuming one WordCounter per map job and one Adder per reduce job). The main runs on the Master.
-
-2. If a machine running WordCounter::Map() crashes, the master will see that and reschedule all of
-it's uncompleted jobs on a functioning machine
