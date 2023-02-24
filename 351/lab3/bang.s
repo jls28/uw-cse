@@ -1,4 +1,0 @@
-movq $0x712764d71d1f9853, %rdi
-movq %rdi, 0x602308
-pushq $0x0000000000401020
-retq
