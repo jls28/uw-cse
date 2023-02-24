@@ -1,8 +1,0 @@
-#lang racket
-(define (zif-thunk e1 e2 e3)
-  (if e1 (e2) (e3)))
-
-(define (zfact n)
-  (zif (- n 0)
-       1
-       (* n (zfact (- n 1 )))))
